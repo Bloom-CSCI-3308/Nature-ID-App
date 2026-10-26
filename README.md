@@ -33,16 +33,18 @@ Instead of asking "what is this plant?", Bloom asks "which plants can I find?" a
 ## Project Structure
 
 ```
-bloom/
-├── public/          # HTML, CSS, client-side JS, images
-├── routes/          # Express routes
-├── database/        # SQL schema and seed files
-├── server.js        # Node.js entry point
-├── .env             # Environment variables (not committed)
+Bloom/
+├── Assets/                 # Logo and images
+├── MilestoneSubmissions/   # Course milestone deliverables
+├── TeamMeetingLogs/        # Team meeting notes
+├── ProjectSourceCode/
+│   ├── public/             # HTML, CSS, client-side JS, images
+│   ├── routes/             # Express routes
+│   ├── database/           # SQL schema and seed files
+│   ├── server.js           # Node.js entry point
+│   └── .env                # Environment variables (not committed)
 └── README.md
 ```
-
-> Update this section to match your actual folder layout.
 
 ## Safety and Responsibility
 
@@ -64,7 +66,7 @@ bloom/
 - Nicholas Gowin
 - Simon Logan
 - Tariq Ahmad
-- Justin
+- Justin Pleva
 - Akshay
 
 ## Acknowledgments
