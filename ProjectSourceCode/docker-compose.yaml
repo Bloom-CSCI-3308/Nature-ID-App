@@ -1,0 +1,26 @@
+  services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme-local-only}
+      - POSTGRES_DB=${POSTGRES_DB:-bloom_db}
+    volumes:
+      - bloom-db-data:/var/lib/postgresql/data
+      - ./src/init_data:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - PORT=3000
+    depends_on:
+      - db
+
+volumes:
+  bloom-db-data:

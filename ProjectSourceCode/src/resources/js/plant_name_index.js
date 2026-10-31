@@ -35,7 +35,41 @@ const upload = multer({
   },
 });
 
-// Shared core: one photo buffer -> Pl@ntNet response JSON.
+// Turn Pl@ntNet's raw response into the fields the app actually uses.
+// Raw response: bestMatch + results[] with nested species/genus/family,
+// plus gbif/powo ids, version, language, etc.
+// Parsed result: one flat object — bestMatch, commonName, scientificName,
+// family, genus, confidence (0-1) and confidencePercent, predictedOrgan,
+// a short alternatives list, and remainingIdentificationRequests.
+// Example (your blue grass photo):
+//   bestMatch: "Festuca glauca Vill.", commonName: "Blue fescue",
+//   confidence: 0.93893, confidencePercent: 93.9,
+//   alternatives: [{ scientificName: "Corynephorus canescens (L.) P.Beauv.",
+//     commonName: "Grey Hair Grass", score: 0.00572 }, ...]
+//   remainingIdentificationRequests: 499
+function parsePlantNetResponse(data) {
+  const top = (data.results && data.results[0]) || null;
+  const species = (top && top.species) || {};
+  return {
+    bestMatch: data.bestMatch || null,
+    scientificName: species.scientificName || data.bestMatch || null,
+    commonName: (species.commonNames && species.commonNames[0]) || null,
+    commonNames: species.commonNames || [],
+    genus: (species.genus && species.genus.scientificNameWithoutAuthor) || null,
+    family: (species.family && species.family.scientificNameWithoutAuthor) || null,
+    confidence: top ? top.score : null,
+    confidencePercent: top ? Math.round(top.score * 1000) / 10 : null,
+    predictedOrgan: (data.predictedOrgans && data.predictedOrgans[0] && data.predictedOrgans[0].organ) || null,
+    alternatives: (data.results || []).slice(1).map((r) => ({
+      scientificName: r.species && r.species.scientificName,
+      commonName: (r.species && r.species.commonNames && r.species.commonNames[0]) || null,
+      score: r.score,
+    })),
+    remainingIdentificationRequests: data.remainingIdentificationRequests,
+  };
+}
+
+// Shared core: one photo buffer -> parsed Pl@ntNet result (see above).
 // Throws an Error with .status for Pl@ntNet rejections, so both the
 // HTML route and the JSON route can report it in their own format.
 async function identifyWithPlantNet(file, organ) {
@@ -59,7 +93,7 @@ async function identifyWithPlantNet(file, organ) {
     err.details = data;
     throw err;
   }
-  return data;
+  return parsePlantNetResponse(data);
 }
 
 app.get('/', (req, res) => res.redirect('/identify'));
@@ -71,12 +105,10 @@ app.post('/identify', (req, res) => {
     if (uploadErr) return res.render('pages/identify', { message: uploadErr.message, error: true });
     if (!req.file) return res.render('pages/identify', { message: 'Choose a JPG or PNG photo first.', error: true });
     try {
-      const data = await identifyWithPlantNet(req.file, req.body.organ);
+      const result = await identifyWithPlantNet(req.file, req.body.organ);
       res.render('pages/identify', {
-        bestMatch: data.bestMatch,
-        results: data.results || [],
-        predictedOrgans: data.predictedOrgans || [],
-        remaining: data.remainingIdentificationRequests,
+        ...result,
+        remaining: result.remainingIdentificationRequests,
       });
     } catch (err) {
       res.render('pages/identify', { message: err.message, error: true });
@@ -86,15 +118,15 @@ app.post('/identify', (req, res) => {
 
 // JSON version, for Postman and for the teammate's frontend/DB code.
 // Request: multipart form-data, field "image" (File), optional "organ" (Text).
-// Response: Pl@ntNet's JSON verbatim (bestMatch, results, predictedOrgans,
-// remainingIdentificationRequests, ...), or { error } with the right status.
+// Response: the parsed result (see parsePlantNetResponse), NOT Pl@ntNet's
+// raw nested JSON, or { error } with the right status.
 app.post('/api/identify', (req, res) => {
   upload.single('image')(req, res, async (uploadErr) => {
     if (uploadErr) return res.status(400).json({ error: uploadErr.message });
     if (!req.file) return res.status(400).json({ error: 'No image uploaded. Send multipart field "image" as a File.' });
     try {
-      const data = await identifyWithPlantNet(req.file, req.body.organ);
-      res.json(data);
+      const result = await identifyWithPlantNet(req.file, req.body.organ);
+      res.json(result);
     } catch (err) {
       res.status(err.status || 500).json({ error: err.message, details: err.details || undefined });
     }

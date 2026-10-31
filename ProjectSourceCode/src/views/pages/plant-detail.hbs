@@ -1,0 +1,24 @@
+<div class="plant-detail-page">
+  <header class="top-bar">
+    <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
+    <span class="ms-auto small text-muted">Date found: {{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>
+  </header>
+
+  <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
+
+  <div class="plant-detail-body">
+    {{#if plant.image}}
+      <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-detail-img" />
+    {{else}}
+      <div class="plant-detail-img placeholder">🌾</div>
+    {{/if}}
+    <p class="plant-description">
+      {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
+    </p>
+    {{#if plant.scientificName}}
+      <p class="text-muted"><em>{{plant.scientificName}}</em></p>
+    {{/if}}
+  </div>
+
+  <a href="/search" class="btn btn-outline-secondary mt-3">← Back to Bloomdex</a>
+</div>

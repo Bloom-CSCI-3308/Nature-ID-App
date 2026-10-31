@@ -1,0 +1,28 @@
+<div class="search-page">
+  <form action="/search" method="GET" class="search-bar">
+    <input type="search" name="q" class="form-control" placeholder="🔍 Search" value="{{query}}" />
+    <button type="submit" class="btn btn-outline-success">Search</button>
+  </form>
+
+  <div class="plant-grid">
+    {{#each plants}}
+      <a href="/plants/{{id}}" class="plant-card">
+        {{#if image}}<img src="{{image}}" alt="{{commonName}}" />{{else}}<div class="plant-thumb">{{commonName}}</div>{{/if}}
+        <span class="plant-name">{{commonName}}</span>
+      </a>
+    {{else}}
+      <a href="/plants/grass" class="plant-card">
+        <div class="plant-thumb">🌾</div>
+        <span class="plant-name">grass</span>
+      </a>
+      <a href="/plants/tree" class="plant-card">
+        <div class="plant-thumb">🌳</div>
+        <span class="plant-name">tree</span>
+      </a>
+      <a href="/plants/flower" class="plant-card">
+        <div class="plant-thumb">🌸</div>
+        <span class="plant-name">flower</span>
+      </a>
+    {{/each}}
+  </div>
+</div>

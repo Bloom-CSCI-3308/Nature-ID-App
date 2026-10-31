@@ -1,0 +1,72 @@
+body { background: #e9ecef; }
+.phone-shell {
+  max-width: 430px;
+  margin: 0 auto;
+  background: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+}
+.page-content { flex: 1; padding: 1rem 1rem 5.5rem; }
+.top-bar {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.25rem 0; margin-bottom: 1rem;
+}
+.top-logo, .top-camera, .top-settings { font-size: 1.5rem; text-decoration: none; }
+.top-settings { margin-left: auto; }
+
+/* Bottom nav — matches the wireframe: Bloomdex / Photo / Rewards */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  display: flex; justify-content: space-around;
+  background: #fff; border-top: 1px solid #dee2e6; padding: 0.5rem 0;
+}
+.bottom-nav .nav-item { text-align: center; color: #212529; text-decoration: none; }
+.bottom-nav .nav-icon { display: block; font-size: 1.4rem; }
+.bottom-nav .nav-label { font-size: 0.8rem; }
+
+/* Camera */
+.camera-view { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; text-align: center; }
+.camera-placeholder { font-size: 5rem; }
+.camera-preview { max-width: 100%; border-radius: 0.5rem; }
+.take-photo-form { text-align: center; margin-top: 1rem; }
+.take-photo-btn {
+  display: inline-block; border: 2px solid #198754; color: #198754;
+  border-radius: 999px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer;
+}
+
+/* Login */
+.login-page { padding-top: 3rem; }
+.logo-circle { font-size: 4rem; }
+.logo-text { font-weight: 700; margin-bottom: 2rem; }
+.login-form { max-width: 320px; margin: 0 auto; }
+
+/* Profile */
+.profile-icon { font-size: 3.5rem; }
+.profile-tabs { display: flex; gap: 1rem; margin: 1rem 0; font-weight: 600; }
+.profile-tabs .tab.active { border-bottom: 2px solid #198754; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.badge-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.75rem 0.25rem; text-align: center; }
+.badge-card.locked { opacity: 0.5; }
+.badge-icon { display: block; font-size: 1.6rem; }
+.badge-name { font-size: 0.8rem; }
+
+/* Search / Bloomdex */
+.search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.plant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.plant-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem; text-align: center; color: #212529; text-decoration: none; }
+.plant-thumb { font-size: 2.5rem; }
+.plant-name { display: block; font-size: 0.9rem; }
+
+/* Plant detail */
+.plant-title { text-transform: capitalize; }
+.plant-detail-img { font-size: 5rem; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; max-width: 100%; }
+.plant-description { margin-top: 1rem; font-size: 1.05rem; }
+
+/* Settings */
+.settings-title { margin: 0; }
+.back-link { font-size: 1.5rem; text-decoration: none; color: #212529; }
+.settings-item { display: block; padding: 0.75rem 0; border-bottom: 1px solid #eee; color: #212529; text-decoration: none; }

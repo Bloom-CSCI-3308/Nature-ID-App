@@ -1,0 +1,25 @@
+<div class="camera-page">
+  <header class="top-bar">
+    <span class="top-logo">🌱</span>
+    <span class="top-camera">📷</span>
+    <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
+  </header>
+
+  <div class="camera-view">
+    <p class="camera-hint">Shows what camera sees</p>
+    <div class="camera-placeholder">
+      <span class="flower-art">🌻</span>
+    </div>
+    {{#if previewImage}}
+      <img src="{{previewImage}}" alt="Camera preview" class="camera-preview" />
+    {{/if}}
+  </div>
+
+  <form action="/identify" method="POST" enctype="multipart/form-data" class="take-photo-form">
+    <label class="take-photo-btn">
+      <input type="file" name="image" accept="image/*" capture="environment" hidden />
+      <span>◎ Take Photo</span>
+    </label>
+    <p class="small text-muted mt-2">Or upload a photo to identify it with Pl@ntNet.</p>
+  </form>
+</div>

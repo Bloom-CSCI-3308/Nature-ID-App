@@ -1,0 +1,33 @@
+<div class="profile-page">
+  <header class="top-bar">
+    <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
+    <span class="ms-auto small text-muted">Profile</span>
+  </header>
+
+  <div class="profile-header text-center">
+    <div class="profile-icon">👤</div>
+    <h2>{{#if user}}{{user.name}}{{else}}John Doe{{/if}}</h2>
+  </div>
+
+  <div class="profile-tabs">
+    <span class="tab active">Challenges</span>
+    <span class="tab">Achievements</span>
+  </div>
+
+  <div class="badge-grid">
+    {{#each badges}}
+      <div class="badge-card {{#if locked}}locked{{/if}}">
+        <span class="badge-icon">{{icon}}</span>
+        <span class="badge-name">{{name}}</span>
+        {{#if locked}}<span class="badge-lock">🔒</span>{{/if}}
+      </div>
+    {{else}}
+      <div class="badge-card"><span class="badge-icon">🏆</span><span class="badge-name">First Find</span></div>
+      <div class="badge-card"><span class="badge-icon">🌿</span><span class="badge-name">Trail Scout</span></div>
+      <div class="badge-card"><span class="badge-icon">🔍</span><span class="badge-name">Plant Detective</span></div>
+      <div class="badge-card locked"><span class="badge-icon">🔒</span><span class="badge-name">Locked</span></div>
+      <div class="badge-card locked"><span class="badge-icon">🔒</span><span class="badge-name">Locked</span></div>
+      <div class="badge-card locked"><span class="badge-icon">🔒</span><span class="badge-name">Locked</span></div>
+    {{/each}}
+  </div>
+</div>

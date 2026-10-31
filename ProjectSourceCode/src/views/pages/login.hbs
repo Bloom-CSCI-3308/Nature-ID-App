@@ -1,0 +1,28 @@
+<div class="login-page text-center">
+  <div class="logo-circle">🌱</div>
+  <h1 class="logo-text">Bloom</h1>
+
+  {{#if message}}
+    <div class="alert alert-info">{{message}}</div>
+  {{/if}}
+
+  <form action="/login" method="POST" class="login-form">
+    <div class="mb-3 text-start">
+      <label for="email" class="form-label">📧 Email / ID</label>
+      <input type="text" class="form-control" id="email" name="email" placeholder="Email / ID" required />
+    </div>
+    <div class="mb-3 text-start">
+      <label for="password" class="form-label">🔒 Password</label>
+      <input type="password" class="form-control" id="password" name="password" placeholder="Password" required />
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="remember" name="remember" />
+        <label class="form-check-label" for="remember">Remember me</label>
+      </div>
+      <a href="/forgot-password" class="small">Forgot Password?</a>
+    </div>
+    <button type="submit" class="btn btn-success w-100 btn-lg">Log in</button>
+  </form>
+  <p class="mt-3 small text-muted">Prototype only — real login is handled separately.</p>
+</div>
