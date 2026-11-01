@@ -2,6 +2,7 @@
 const express = require('express');
 const handlebars = require('express-handlebars');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
 const pgp = require('pg-promise')();
 const path = require('path');
 
@@ -21,6 +22,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use('/resources', express.static(path.join(__dirname, 'resources')));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: false,
+  })
+);
 
 // -------------------------------------   DB CONFIG   ----------------------------------------------
 const db = pgp({
@@ -60,7 +69,7 @@ app.post('/register', async (req, res) => {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
     res.redirect('/login');
   } catch (err) {
-    // 23505 = unique_violation, i.e. the username already exists
+    // 23505 = the username already exists
     if (err.code === '23505') {
       return res.status(400).render('pages/register', {
         username,
@@ -75,6 +84,66 @@ app.post('/register', async (req, res) => {
       message: 'Something went wrong. Please try again.',
     });
   }
+});
+
+app.get('/login', (req, res) => {
+  res.render('pages/login');
+});
+
+app.post('/login', async (req, res) => {
+  const username = (req.body.username || '').trim();
+  const password = req.body.password || '';
+
+  if (!username || !password) {
+    return res.status(400).render('pages/login', {
+      username,
+      error: true,
+      message: 'Username and password are required.',
+    });
+  }
+
+  try {
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+    // Same message for unknown username and wrong password so usernames can't be guessed
+    const match = user && (await bcrypt.compare(password, user.password));
+    if (!match) {
+      return res.status(400).render('pages/login', {
+        username,
+        error: true,
+        message: 'Incorrect username or password.',
+      });
+    }
+
+    req.session.user = { user_id: user.user_id, username: user.username };
+    req.session.save(() => res.redirect('/home'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/login', {
+      username,
+      error: true,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+});
+
+// -------------------------------------   AUTH MIDDLEWARE   ----------------------------------------------
+// Every route registered below this requires a logged-in user
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+};
+
+app.use(auth);
+
+// -------------------------------------   PROTECTED ROUTES   ----------------------------------------------
+app.get('/home', (req, res) => {
+  res.render('pages/home', { user: req.session.user });
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/login'));
 });
 
 // -------------------------------------   START SERVER   ----------------------------------------------
