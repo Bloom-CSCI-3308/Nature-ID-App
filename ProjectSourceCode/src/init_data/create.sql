@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS plants (
   plant_id SERIAL PRIMARY KEY,
   common_name VARCHAR(100) NOT NULL,
   scientific_name VARCHAR(150) UNIQUE NOT NULL,
-  plant_description VARCHAR(500) NOT NULL
+  plant_description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS users_to_plants (
