@@ -1,0 +1,17 @@
+10/26/2026
+
+Tariq -
+Simon -
+Nicholas - Working prototype for plant identification from a photo, plus a Handlebars page framework for the app's frontend.
+
+Added
+
+Working identification prototype: takes a JPG or PNG image input and finds the closest matching plant, then outputs a parsed list including confidence, scientific name, and standard/common names.
+API route: POST /api/identify, multipart form-data, field image, optional organ (leaf/flower/fruit/bark/auto, default auto).
+Parsed output fields: bestMatch, scientificName, commonName, commonNames, genus, family, confidence, confidencePercent, predictedOrgan, alternatives, and remainingIdentificationRequests — replacing the raw Pl@ntNet JSON response, which was harder to use on a page.
+Verified end-to-end on Oct 31: a photo returned Blue fescue, Festuca glauca Vill., at 93.9% confidence, predicted organ leaf, via the JSON identify route.
+Handlebars framework: a shared layout and partials structure (main layout, header, footer) with separate pages for home/camera, login, register, search/Bloomdex, plant detail, profile, and settings, plus a shared stylesheet and script file. Pages can be tweaked through the layout and partials instead of wildly changing large amounts of code per page.
+
+for testing
+Justin -
+Akshay - N/A
