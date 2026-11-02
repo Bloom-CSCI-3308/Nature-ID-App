@@ -7,7 +7,7 @@ Tariq finished the google doc for lab 8, including the extra credit portion, and
 
 Simon created all the folders and general repo setup and helped with the google doc, and also started looking into how everything on the backend is going to connect. 
 
-Akshay did not show up to the meeting. 
+Akshay N/A
 
 Justin was at the meeting and will make a commit by the end of the day today. 
 
@@ -21,5 +21,5 @@ Simon has been working on the data architecture which includes creating tables, 
 
 Tariq worked on setting the project board up, directory structure, and updating dependencies and the package.json and package-lock.json files
 
-Akshay did not show up to the meeting.
+Akshay N/A
 
