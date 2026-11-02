@@ -12,6 +12,8 @@ Parsed output fields: bestMatch, scientificName, commonName, commonNames, genus,
 Verified end-to-end on Oct 31: a photo returned Blue fescue, Festuca glauca Vill., at 93.9% confidence, predicted organ leaf, via the JSON identify route.
 Handlebars framework: a shared layout and partials structure (main layout, header, footer) with separate pages for home/camera, login, register, search/Bloomdex, plant detail, profile, and settings, plus a shared stylesheet and script file. Pages can be tweaked through the layout and partials instead of wildly changing large amounts of code per page.
 
-for testing
+for testing:
+curl -F "image=@/Users/nicholasgowin/Desktop/images.jpeg" http://localhost:3000/api/identify
+
 Justin -
 Akshay - N/A
