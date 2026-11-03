@@ -1,6 +1,8 @@
 10/26/2026
 
-Tariq -
+Tariq - Set up the GitHub project board, moved logo in the resource folder with a new img folder and home.png file. Fixed package.json by adding missing 
+dependencies(bcryptjs ,express-session, pg-promise, and axios), and added a update package.json and package-lock.json into the Source Code folder.
+
 Simon -
 
 Base data structures for gathering data from each user, as well as creating a database of plants as they get indentified. Also connected Wikipedia to our project to give descriptions about each plant. 
