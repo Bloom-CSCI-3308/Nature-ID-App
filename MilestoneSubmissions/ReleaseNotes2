@@ -2,6 +2,14 @@
 
 Tariq -
 Simon -
+
+Base data structures for gathering data from each user, as well as creating a database of plants as they get indentified. Also connected Wikipedia to our project to give descriptions about each plant. 
+
+- create.sql: wrote the 5 database tables: users (login info + points), plants (common name, scientific name, description), users_to_plants (which plants each user found, with photo, location, and date), badges (name, description, number of plants required), and users_to_badges (which badges each user earned). Used foreign keys with ON DELETE CASCADE so deleting a user removes their data.
+  - insert.sql: added starter data: 6 badges (from 1 to 500 plants found) and 5 Colorado starter plants.
+  - plantHelpers.js: added getPlantDescription(), which looks up a plant's scientific name on Wikipedia and returns a 1–2 sentence description (with a fallback message if no page exists), and getOrCreatePlant(), which adds a plant to the database the first time anyone identifies it, so Wikipedia is only called once per species.
+  - index.js (collection-routes branch, not merged yet): added GET /collection, which lists the logged-in user's plants newest first, and GET /plants/:id, which shows one plant's details (name, scientific name, description, photo, date first found); users can only view plants they've found.
+
 Nicholas - Working prototype for plant identification from a photo, plus a Handlebars page framework for the app's frontend.
 
 Added
