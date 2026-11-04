@@ -26,4 +26,14 @@ for testing:
 curl -F "image=@/Users/nicholasgowin/Desktop/images.jpeg" http://localhost:3000/api/identify
 
 Justin -
+
+User accounts: sign up and sign in with hashed passwords and login sessions, so each user's plants and badges can be tied to their account.
+
+- index.js, GET/POST /register: checks the username (max 50 characters) and password (8–72 characters), hashes the password with bcrypt, and saves the user to the users table. A duplicate username gets a "That username is already taken." message. Success redirects to /login.
+- index.js, GET/POST /login: checks the password against the stored bcrypt hash. On success, saves the user's id and username in a session (express-session) and redirects to /home. A wrong password and an unknown username get the same error message, so nobody can use the form to find out which usernames exist.
+- index.js, auth middleware: every route added after it requires a logged-in user. Logged-out users are redirected to /login. GET /home and GET /logout (ends the session) both require login.
+- Verified end-to-end on Nov 1 against Postgres using create.sql. 12 checks passed: register, empty fields, wrong password, unknown user, correct login, /home while logged in and logged out, and logout.
+- Requires SESSION_SECRET in .env. Without it, every page returns an error.
+- Known issue: login.hbs and register.hbs send the username as name="email". They need name="username" before the pages work with these routes.
+
 Akshay - N/A
