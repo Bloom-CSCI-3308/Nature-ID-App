@@ -5,9 +5,10 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { db } = require('./db');
 const path = require('path');
-const validateRegistration = require('./validateRegistration');
-
+const { getOrCreatePlant } = require('./plantHelpers');
 const app = express();
+
+
 
 // -------------------------------------   APP CONFIG   ----------------------------------------------
 const hbs = handlebars.create({
@@ -141,6 +142,76 @@ app.get('/home', (req, res) => {
 
 app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
+});
+
+
+// -------------------------------------   COLLECTION ROUTES   ----------------------------------------------
+
+app.get('/collection', async (req, res) => {
+  const userId = req.session.user.user_id;
+
+  try {
+    const plants = await db.any(
+      `SELECT p.plant_id, p.common_name, p.scientific_name,
+              up.image_path, up.location, up.found_at
+       FROM users_to_plants up
+       JOIN plants p ON p.plant_id = up.plant_id
+       WHERE up.user_id = $1
+       ORDER BY up.found_at DESC`,
+      [userId]
+    );
+
+    res.render('pages/collection', { plants, user: req.session.user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/collection', {
+      plants: [],
+      user: req.session.user,
+      error: true,
+      message: 'Could not load your collection. Please try again.',
+    });
+  }
+
+// Show one plant the logged-in user has found
+app.get('/plants/:id', async (req, res) => {
+  const userId = req.session.user.user_id;
+  const plantId = parseInt(req.params.id, 10);
+
+  // /plants/abc or /plants/-1 → back to the collection
+  if (!Number.isInteger(plantId) || plantId < 1) {
+    return res.redirect('/collection');
+  }
+
+  try {
+    const plant = await db.oneOrNone(
+      `SELECT p.plant_id AS id,
+              p.common_name AS "commonName",
+              p.scientific_name AS "scientificName",
+              p.plant_description AS description,
+              up.image_path AS image,
+              up.location,
+              TO_CHAR(up.found_at, 'Mon DD, YYYY') AS "dateFound"
+       FROM users_to_plants up
+       JOIN plants p ON p.plant_id = up.plant_id
+       WHERE up.user_id = $1 AND up.plant_id = $2
+       ORDER BY up.found_at ASC
+       LIMIT 1`,
+      [userId, plantId]
+    );
+
+    // Not in this user's collection (or doesn't exist)
+    if (!plant) {
+      return res.redirect('/collection');
+    }
+
+    res.render('pages/plant-detail', { plant, user: req.session.user });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/collection');
+  }
+});
+
+  
 });
 
 // -------------------------------------   START SERVER   ----------------------------------------------
