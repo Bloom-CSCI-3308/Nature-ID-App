@@ -1,0 +1,39 @@
+10/26/2026
+
+Tariq - Set up the GitHub project board, moved logo in the resource folder with a new img folder and home.png file. Fixed package.json by adding missing 
+dependencies(bcryptjs ,express-session, pg-promise, and axios), and added a update package.json and package-lock.json into the Source Code folder.
+
+Simon -
+
+Base data structures for gathering data from each user, as well as creating a database of plants as they get indentified. Also connected Wikipedia to our project to give descriptions about each plant. 
+
+- create.sql: wrote the 5 database tables: users (login info + points), plants (common name, scientific name, description), users_to_plants (which plants each user found, with photo, location, and date), badges (name, description, number of plants required), and users_to_badges (which badges each user earned). Used foreign keys with ON DELETE CASCADE so deleting a user removes their data.
+  - insert.sql: added starter data: 6 badges (from 1 to 500 plants found) and 5 Colorado starter plants.
+  - plantHelpers.js: added getPlantDescription(), which looks up a plant's scientific name on Wikipedia and returns a 1–2 sentence description (with a fallback message if no page exists), and getOrCreatePlant(), which adds a plant to the database the first time anyone identifies it, so Wikipedia is only called once per species.
+  - index.js (collection-routes branch, not merged yet): added GET /collection, which lists the logged-in user's plants newest first, and GET /plants/:id, which shows one plant's details (name, scientific name, description, photo, date first found); users can only view plants they've found.
+
+Nicholas - Working prototype for plant identification from a photo, plus a Handlebars page framework for the app's frontend.
+
+Added
+
+Working identification prototype: takes a JPG or PNG image input and finds the closest matching plant, then outputs a parsed list including confidence, scientific name, and standard/common names.
+API route: POST /api/identify, multipart form-data, field image, optional organ (leaf/flower/fruit/bark/auto, default auto).
+Parsed output fields: bestMatch, scientificName, commonName, commonNames, genus, family, confidence, confidencePercent, predictedOrgan, alternatives, and remainingIdentificationRequests — replacing the raw Pl@ntNet JSON response, which was harder to use on a page.
+Verified end-to-end on Oct 31: a photo returned Blue fescue, Festuca glauca Vill., at 93.9% confidence, predicted organ leaf, via the JSON identify route.
+Handlebars framework: a shared layout and partials structure (main layout, header, footer) with separate pages for home/camera, login, register, search/Bloomdex, plant detail, profile, and settings, plus a shared stylesheet and script file. Pages can be tweaked through the layout and partials instead of wildly changing large amounts of code per page.
+
+for testing:
+curl -F "image=@/Users/nicholasgowin/Desktop/images.jpeg" http://localhost:3000/api/identify
+
+Justin -
+
+User accounts: sign up and sign in with hashed passwords and login sessions, so each user's plants and badges can be tied to their account.
+
+- index.js, GET/POST /register: checks the username (max 50 characters) and password (8–72 characters), hashes the password with bcrypt, and saves the user to the users table. A duplicate username gets a "That username is already taken." message. Success redirects to /login.
+- index.js, GET/POST /login: checks the password against the stored bcrypt hash. On success, saves the user's id and username in a session (express-session) and redirects to /home. A wrong password and an unknown username get the same error message, so nobody can use the form to find out which usernames exist.
+- index.js, auth middleware: every route added after it requires a logged-in user. Logged-out users are redirected to /login. GET /home and GET /logout (ends the session) both require login.
+- Verified end-to-end on Nov 1 against Postgres using create.sql. 12 checks passed: register, empty fields, wrong password, unknown user, correct login, /home while logged in and logged out, and logout.
+- Requires SESSION_SECRET in .env. Without it, every page returns an error.
+- Known issue: login.hbs and register.hbs send the username as name="email". They need name="username" before the pages work with these routes.
+
+Akshay - N/A
