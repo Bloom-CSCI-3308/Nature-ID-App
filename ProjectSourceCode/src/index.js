@@ -3,8 +3,9 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
-const pgp = require('pg-promise')();
+const { db } = require('./db');
 const path = require('path');
+const validateRegistration = require('./validateRegistration');
 
 const app = express();
 
@@ -32,13 +33,7 @@ app.use(
 );
 
 // -------------------------------------   DB CONFIG   ----------------------------------------------
-const db = pgp({
-  host: process.env.POSTGRES_HOST || 'db',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-});
+// Database connection is in src/db.js — imported above, so routes and tests share it. (FOR LAB 10)
 
 // -------------------------------------   PUBLIC ROUTES   ----------------------------------------------
 app.get('/register', (req, res) => {
@@ -49,20 +44,18 @@ app.post('/register', async (req, res) => {
   const username = (req.body.username || '').trim();
   const password = req.body.password || '';
 
-  if (!username || !password) {
-    return res.status(400).render('pages/register', {
-      username,
-      error: true,
-      message: 'Username and password are required.',
-    });
-  }
-  if (username.length > 50 || password.length < 8 || password.length > 72) {
-    return res.status(400).render('pages/register', {
-      username,
-      error: true,
-      message: 'Username must be at most 50 characters and password 8–72 characters.',
-    });
-  }
+  if (!validateRegistration({ username, password })) {
+  const message =
+    !username || !password
+      ? 'Username and password are required.'
+      : 'Username must be at most 50 characters and password 8–72 characters.';
+  return res.status(400).render('pages/register', {
+    username,
+    error: true,
+    message,
+  });
+}
+
 
   try {
     const hash = await bcrypt.hash(password, 10);
@@ -124,6 +117,10 @@ app.post('/login', async (req, res) => {
       message: 'Something went wrong. Please try again.',
     });
   }
+});
+
+app.get('/welcome', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Welcome!' });
 });
 
 // -------------------------------------   AUTH MIDDLEWARE   ----------------------------------------------
