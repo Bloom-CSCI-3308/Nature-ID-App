@@ -3,10 +3,13 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const validateRegistration = require('./validateRegistration');
 const { db } = require('./db');
 const path = require('path');
 const { getOrCreatePlant } = require('./plantHelpers');
 const app = express();
+
+
 
 
 

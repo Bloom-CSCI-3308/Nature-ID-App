@@ -73,3 +73,58 @@ describe('POST /register', () => {
     expect(user).to.equal(null);
   });
 });
+
+
+describe('POST /login', () => {
+  it('logs in with correct credentials and redirects to /home', async () => {
+    const username = `lab10_${randomUUID()}`;
+    const password = 'TestPassword123!';
+
+    // Arrange: create the user through the real registration route.
+    await chai
+      .request(app)
+      .post('/register')
+      .redirects(0)
+      .type('form')
+      .send({ username, password });
+
+    // Act: log in with the same credentials.
+    const res = await chai
+      .request(app)
+      .post('/login')
+      .redirects(0)
+      .type('form')
+      .send({ username, password });
+
+    // Assert: redirect to /home, with a session cookie set.
+    expect(res).to.have.status(302);
+    expect(res).to.have.header('location', '/home');
+    expect(res).to.have.header('set-cookie');
+
+    await db.none('DELETE FROM users WHERE username = $1', [username]);
+  });
+
+  it('rejects a login with the wrong password', async () => {
+    const username = `lab10_${randomUUID()}`;
+    const password = 'TestPassword123!';
+
+    await chai
+      .request(app)
+      .post('/register')
+      .redirects(0)
+      .type('form')
+      .send({ username, password });
+
+    const res = await chai
+      .request(app)
+      .post('/login')
+      .redirects(0)
+      .type('form')
+      .send({ username, password: 'WrongPassword123!' });
+
+    expect(res).to.have.status(400);
+    expect(res.text).to.include('Incorrect username or password.');
+
+    await db.none('DELETE FROM users WHERE username = $1', [username]);
+  });
+});
