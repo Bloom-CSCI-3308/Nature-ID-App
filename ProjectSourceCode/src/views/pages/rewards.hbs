@@ -1,0 +1,33 @@
+<div class="rewards-page">
+  <h2>Rewards</h2>
+
+  {{#if message}}
+    <div class="alert alert-danger" role="alert">{{message}}</div>
+  {{/if}}
+
+  <p>
+    <strong>{{points}}</strong> points ·
+    <strong>{{plantCount}}</strong> plants found
+  </p>
+
+  {{#if nextBadge}}
+    <p>
+      Next badge: <strong>{{nextBadge.name}}</strong>
+      ({{plantCount}} / {{nextBadge.plantsRequired}} plants)
+    </p>
+  {{/if}}
+
+  <ul class="list-group">
+    {{#each badges}}
+      <li class="list-group-item {{#unless earned}}text-muted{{/unless}}">
+        <span aria-hidden="true">{{#if earned}}🏅{{else}}🔒{{/if}}</span>
+        <strong>{{name}}</strong> — {{description}}
+        {{#if earned}}
+          <span class="small">(earned {{dateEarned}})</span>
+        {{else}}
+          <span class="small">(locked: find {{plantsRequired}} plants)</span>
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+</div>
