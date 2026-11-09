@@ -13,3 +13,8 @@ src/index.js: "Remember me" on the login page now works. Checked keeps the user 
 login.hbs and register.hbs: the username stays filled in after a failed login or signup, so only the password needs retyping. Removed the "Prototype only" notes now that login is real, and fixed the register page label so clicking "Username" selects the box.
 Project board: wrote the description for epic #7 (User Registration and Login) and added two user stories with acceptance criteria: #21 Create an account and #22 Log in and log out.
 Tested end-to-end against a local Postgres database: signup, login, wrong password, Remember me (cookie lasts 30 days when checked, ends with the browser when not), and logout all worked.
+
+Simon - Built the backend for saving plants and rewards, and tested it.
+src/index.js: fixed a bug where /plants/:id was nested inside /collection; added POST /collection (saves a plant, awards 10 points for new species, unlocks badges) and GET /rewards (points, plants found, earned and locked badges).
+rewards.hbs: new Rewards page.
+test/server.spec.js: added 5 tests for the collection and rewards routes. 15 passing, twice in a row.
