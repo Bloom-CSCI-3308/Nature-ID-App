@@ -2,3 +2,8 @@ Tariq -
 Got the app running locally and fixed problems that were preventing logins and registrations. Fixed a parsing issue in the  Docker Compose file 
 which was not allowing for the app to start. Updated login and register forms so that usernames and passwords could get sent to the server. Updated 
 stylesheet and script paths so pages are loaded with their intended styling. Added a link from the registration page to the login page. 
+
+Nicholas - Created all the tests for this week's lab.
+test/validation.spec.js: unit tests for registration validation in src/validateRegistration.js.
+test/server.spec.js: API integration tests for POST /register (positive and negative), plus extra credit login tests (positive and negative).
+10 passing total — 8 for Part A and 2 extra credit. Tests run against an isolated test database (docker-compose.test.yaml); run instructions in test/README.md.
