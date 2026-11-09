@@ -288,6 +288,56 @@ app.post('/collection', async (req, res) => {
   }
 });
 
+// Show the user's points, plant count, and every badge (earned or locked)
+app.get('/rewards', async (req, res) => {
+  const userId = req.session.user.user_id;
+
+  try {
+    const stats = await db.one(
+      `SELECT u.points,
+              (SELECT COUNT(DISTINCT plant_id)
+               FROM users_to_plants
+               WHERE user_id = u.user_id)::int AS "plantCount"
+       FROM users u
+       WHERE u.user_id = $1`,
+      [userId]
+    );
+
+    const badges = await db.any(
+      `SELECT b.badge_id AS id,
+              b.badge_name AS name,
+              b.badge_description AS description,
+              b.badge_requirements AS "plantsRequired",
+              ub.user_id IS NOT NULL AS earned,
+              TO_CHAR(ub.obtained_at, 'Mon DD, YYYY') AS "dateEarned"
+       FROM badges b
+       LEFT JOIN users_to_badges ub
+         ON ub.badge_id = b.badge_id AND ub.user_id = $1
+       ORDER BY b.badge_requirements ASC`,
+      [userId]
+    );
+
+    // The first badge not earned yet is the next goal
+    const nextBadge = badges.find(b => !b.earned) || null;
+
+    res.render('pages/rewards', {
+      user: req.session.user,
+      points: stats.points,
+      plantCount: stats.plantCount,
+      badges,
+      nextBadge,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/rewards', {
+      user: req.session.user,
+      badges: [],
+      error: true,
+      message: 'Could not load your rewards. Please try again.',
+    });
+  }
+});
+
 // -------------------------------------   START SERVER   ----------------------------------------------
 // Only listen when run directly (npm start); tests import the app without starting a server
 if (require.main === module) {
