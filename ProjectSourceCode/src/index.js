@@ -219,6 +219,75 @@ app.get('/plants/:id', async (req, res) => {
   }
 });
 
+const POINTS_PER_NEW_PLANT = 10;
+
+// Save an identified plant to the logged-in user's collection,
+// award points for new species, and unlock any badges they now qualify for
+app.post('/collection', async (req, res) => {
+  const userId = req.session.user.user_id;
+  const scientificName = (req.body.scientific_name || '').trim();
+  const commonName = (req.body.common_name || '').trim();
+  const imagePath = req.body.image_path || null;
+  const location = (req.body.location || '').trim() || null;
+
+  if (!scientificName) {
+    return res.status(400).render('pages/home', {
+      user: req.session.user,
+      error: true,
+      message: 'No plant to save. Please identify a plant first.',
+    });
+  }
+
+  try {
+    // Find the plant in our database, or add it with a Wikipedia description.
+    // Done before the transaction so the Wikipedia request doesn't hold it open.
+    const plantId = await getOrCreatePlant(db, scientificName, commonName);
+
+    await db.tx(async t => {
+      // Has this user found this species before?
+      const alreadyFound = await t.oneOrNone(
+        'SELECT 1 FROM users_to_plants WHERE user_id = $1 AND plant_id = $2 LIMIT 1',
+        [userId, plantId]
+      );
+
+      await t.none(
+        `INSERT INTO users_to_plants (user_id, plant_id, image_path, location)
+         VALUES ($1, $2, $3, $4)`,
+        [userId, plantId, imagePath, location]
+      );
+
+      // Points only for a species that's new to this user
+      if (!alreadyFound) {
+        await t.none('UPDATE users SET points = points + $1 WHERE user_id = $2', [
+          POINTS_PER_NEW_PLANT,
+          userId,
+        ]);
+      }
+
+      // Award every badge the user now qualifies for (already-earned ones are skipped)
+      await t.none(
+        `INSERT INTO users_to_badges (user_id, badge_id)
+         SELECT $1, b.badge_id
+         FROM badges b
+         WHERE b.badge_requirements <= (
+           SELECT COUNT(DISTINCT plant_id) FROM users_to_plants WHERE user_id = $1
+         )
+         ON CONFLICT (user_id, badge_id) DO NOTHING`,
+        [userId]
+      );
+    });
+
+    res.redirect(`/plants/${plantId}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/home', {
+      user: req.session.user,
+      error: true,
+      message: 'Could not save this plant. Please try again.',
+    });
+  }
+});
+
 // -------------------------------------   START SERVER   ----------------------------------------------
 // Only listen when run directly (npm start); tests import the app without starting a server
 if (require.main === module) {
