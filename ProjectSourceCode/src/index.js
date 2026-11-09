@@ -178,6 +178,7 @@ app.get('/collection', async (req, res) => {
       message: 'Could not load your collection. Please try again.',
     });
   }
+});
 
 // Show one plant the logged-in user has found
 app.get('/plants/:id', async (req, res) => {
@@ -216,9 +217,6 @@ app.get('/plants/:id', async (req, res) => {
     console.error(err);
     res.redirect('/collection');
   }
-});
-
-  
 });
 
 // -------------------------------------   START SERVER   ----------------------------------------------
