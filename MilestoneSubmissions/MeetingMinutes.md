@@ -23,3 +23,15 @@ Tariq worked on setting the project board up, directory structure, and updating 
 
 Akshay N/A
 
+Meeting #3 - November 9th
+
+Simon worked mostly on the data architecture. He added two more routes, one for saving plants to a user's collection (with points and badges) and one for the rewards page, and created 5 tests for them.
+
+Nicholas worked on Lab 10 and created 10 tests for registration, login, and validation.
+
+Akshay is working on adding the Google Maps API, which would let users put pins on the map where they found their plants. He hasn't added anything to the release notes yet.
+
+Tariq worked on getting a local version of the app running and edited several route paths. He also added links between the registration and login pages so users can go back and forth between them.
+
+Justin worked on user registration and login, including the "Remember me" feature and the Handlebars pages. He is also adding a recovery email to user registration.
+
