@@ -112,6 +112,10 @@ app.post('/login', async (req, res) => {
     }
 
     req.session.user = { user_id: user.user_id, username: user.username };
+    // "Remember me" keeps the user logged in for 30 days; otherwise the login ends when the browser closes
+    if (req.body.remember) {
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    }
     req.session.save(() => res.redirect('/home'));
   } catch (err) {
     console.error(err);
