@@ -7,3 +7,9 @@ Nicholas - Created all the tests for this week's lab.
 test/validation.spec.js: unit tests for registration validation in src/validateRegistration.js.
 test/server.spec.js: API integration tests for POST /register (positive and negative), plus extra credit login tests (positive and negative).
 10 passing total — 8 for Part A and 2 extra credit. Tests run against an isolated test database (docker-compose.test.yaml); run instructions in test/README.md.
+
+Justin - Finished the login experience and set up the User Registration and Login epic on the project board.
+src/index.js: "Remember me" on the login page now works. Checked keeps the user logged in for 30 days; unchecked ends the login when the browser closes.
+login.hbs and register.hbs: the username stays filled in after a failed login or signup, so only the password needs retyping. Removed the "Prototype only" notes now that login is real, and fixed the register page label so clicking "Username" selects the box.
+Project board: wrote the description for epic #7 (User Registration and Login) and added two user stories with acceptance criteria: #21 Create an account and #22 Log in and log out.
+Tested end-to-end against a local Postgres database: signup, login, wrong password, Remember me (cookie lasts 30 days when checked, ends with the browser when not), and logout all worked.
