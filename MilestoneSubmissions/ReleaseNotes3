@@ -1,1 +1,4 @@
-
+Tariq - 
+Got the app running locally and fixed problems that were preventing logins and registrations. Fixed a parsing issue in the  Docker Compose file 
+which was not allowing for the app to start. Updated login and register forms so that usernames and passwords could get sent to the server. Updated 
+stylesheet and script paths so pages are loaded with their intended styling. Added a link from the registration page to the login page. 
