@@ -12,7 +12,11 @@
 
   {{#if nextBadge}}
     <p>
-      Next badge: <strong>{{nextBadge.name}}</strong>
+      Next badge:
+      {{#if nextBadge.image}}
+        <img src="{{nextBadge.image}}" class="badge-img badge-img-small" alt="{{nextBadge.name}}" />
+      {{/if}}
+      <strong>{{nextBadge.name}}</strong>
       ({{plantCount}} / {{nextBadge.plantsRequired}} plants)
     </p>
   {{/if}}
@@ -20,7 +24,11 @@
   <ul class="list-group">
     {{#each badges}}
       <li class="list-group-item {{#unless earned}}text-muted{{/unless}}">
-        <span aria-hidden="true">{{#if earned}}🏅{{else}}🔒{{/if}}</span>
+        {{#if image}}
+          <img src="{{image}}" class="badge-img {{#unless earned}}locked{{/unless}}" alt="{{name}}" />
+        {{else}}
+          <span aria-hidden="true">{{#if earned}}🏅{{else}}🔒{{/if}}</span>
+        {{/if}}
         <strong>{{name}}</strong> — {{description}}
         {{#if earned}}
           <span class="small">(earned {{dateEarned}})</span>

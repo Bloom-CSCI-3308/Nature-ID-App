@@ -23,6 +23,7 @@ body { background: #e9ecef; }
   width: 100%; max-width: 430px;
   display: flex; justify-content: space-around;
   background: #fff; border-top: 1px solid #dee2e6; padding: 0.5rem 0;
+  z-index: 10;
 }
 .bottom-nav .nav-item { text-align: center; color: #212529; text-decoration: none; }
 .bottom-nav .nav-icon { display: block; font-size: 1.4rem; }
@@ -57,9 +58,11 @@ body { background: #e9ecef; }
 /* Search / Bloomdex */
 .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .plant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-.plant-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem; text-align: center; color: #212529; text-decoration: none; }
+.plant-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem; text-align: center; color: #212529; text-decoration: none; display: block; }
+.plant-card img { width: 100%; height: 110px; object-fit: cover; border-radius: 0.5rem; display: block; }
 .plant-thumb { font-size: 2.5rem; }
 .plant-name { display: block; font-size: 0.9rem; }
+.plant-count { display: block; font-size: 0.8rem; color: #6c757d; }
 
 /* Plant detail */
 .plant-title { text-transform: capitalize; }
@@ -70,3 +73,151 @@ body { background: #e9ecef; }
 .settings-title { margin: 0; }
 .back-link { font-size: 1.5rem; text-decoration: none; color: #212529; }
 .settings-item { display: block; padding: 0.75rem 0; border-bottom: 1px solid #eee; color: #212529; text-decoration: none; }
+
+/* Camera app — full-screen camera, small bottom bar.
+   Height accounts for the page padding AND the fixed bottom nav
+   (5.5rem at the bottom of .page-content), so the camera bar sits
+   above the bottom nav instead of behind it, and the nav stays
+   clickable. */
+.camera-full {
+  margin: -1rem -1rem 0;
+  height: calc(100dvh - 6.5rem);
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+  position: relative;
+  z-index: 0;
+}
+
+.camera-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+.camera-stage video,
+.camera-stage #snapshot-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  background: #111;
+}
+
+.camera-placeholder .camera-hint {
+  font-size: 1rem;
+  color: #aaa;
+}
+
+.camera-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-size: 1.5rem;
+}
+
+.camera-top-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.camera-top .top-settings {
+  color: #fff;
+  text-decoration: none;
+}
+
+.camera-error {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  margin: 0;
+}
+
+/* Shutter in the bottom nav — replaces the old Photo icon.
+   Raised white circle, centered in the nav. */
+.bottom-nav .camera-shutter {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: #fff;
+  box-shadow: 0 0 0 3px #dee2e6;
+  cursor: pointer;
+  padding: 0;
+  margin-top: -32px;
+}
+
+.bottom-nav .camera-shutter:active {
+  background: #ccc;
+}
+
+/* After capture only: floating Retake / Use row, just above the nav */
+.capture-actions {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.camera-open {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+/* Bloom logo (Assets/bloom_logo.jpeg) — replaces the 🌱 emoji.
+   The logo is a teal circle on an off-white square, so crop it round. */
+.app-logo {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Achievement badge images (Assets/Achievement_*.png) */
+.badge-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.badge-img-small {
+  width: 32px;
+  height: 32px;
+}
+
+.badge-img.locked {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+

@@ -1,25 +1,47 @@
-<div class="camera-page">
-  <header class="top-bar">
-    <span class="top-logo">🌱</span>
-    <span class="top-camera">📷</span>
-    <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
-  </header>
+<div class="camera-full">
+  <div class="camera-stage">
+    {{!-- Live camera preview, fills the screen --}}
+    <video id="camera-video" autoplay playsinline></video>
+    <canvas id="camera-canvas" hidden></canvas>
 
-  <div class="camera-view">
-    <p class="camera-hint">Shows what camera sees</p>
-    <div class="camera-placeholder">
+    {{!-- Captured photo, just as big as the live view --}}
+    <img id="snapshot-preview" alt="Photo you just took" hidden />
+
+    <div class="camera-placeholder" id="camera-placeholder">
       <span class="flower-art">🌻</span>
+      <p class="camera-hint">Camera is off</p>
     </div>
-    {{#if previewImage}}
-      <img src="{{previewImage}}" alt="Camera preview" class="camera-preview" />
-    {{/if}}
+
+    <div class="camera-top">
+      <img src="/resources/img/bloom_logo.jpeg" class="app-logo" alt="Bloom" />
+      <span class="camera-top-right">
+        {{!-- Upload lives up here, top-right --}}
+        <label class="camera-upload" id="camera-upload-label">
+          <input type="file" name="image" accept="image/*" capture="environment" hidden form="take-photo-form" />
+          <span>🖼️</span>
+        </label>
+        <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
+      </span>
+    </div>
+
+    <button type="button" id="open-camera-btn" class="btn btn-light camera-open" hidden>
+      Open Camera
+    </button>
+
+    <p id="camera-error" class="alert alert-danger camera-error" hidden></p>
+
+    {{!-- After capture only: floating row just above the bottom nav --}}
+    <div id="capture-actions" class="capture-actions" hidden>
+      <button type="button" id="retake-btn" class="btn btn-outline-light">
+        Retake
+      </button>
+      <button type="button" id="use-photo-btn" class="btn btn-success">
+        Use This Photo
+      </button>
+    </div>
   </div>
 
-  <form action="/identify" method="POST" enctype="multipart/form-data" class="take-photo-form">
-    <label class="take-photo-btn">
-      <input type="file" name="image" accept="image/*" capture="environment" hidden />
-      <span>◎ Take Photo</span>
-    </label>
-    <p class="small text-muted mt-2">Or upload a photo to identify it with Pl@ntNet.</p>
-  </form>
+  {{!-- Hidden form: the upload input lives in the top bar (form="take-photo-form"),
+       and the snapshot is put into it by script.js, then this form submits. --}}
+  <form action="/identify" method="POST" enctype="multipart/form-data" class="take-photo-form" id="take-photo-form" hidden></form>
 </div>
