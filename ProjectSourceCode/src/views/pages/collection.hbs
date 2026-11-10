@@ -1,0 +1,36 @@
+{{!-- src/views/pages/collection.hbs — NEW FILE
+     The Bloomdex. GET /collection renders this (see INDEX_EDITS.md Edit 3).
+     Expects: plants (one row per species, with id, commonName,
+     scientificName, timesFound, image, lastFound),
+     totalSpecies, totalFinds, user. --}}
+<div class="collection-page">
+  <h2>Your Bloomdex</h2>
+
+  <p class="text-muted">
+    {{totalSpecies}} species &middot; {{totalFinds}} plants found
+  </p>
+
+  {{#if message}}
+    <div class="alert alert-danger mt-3">{{message}}</div>
+  {{/if}}
+
+  <div class="plant-grid">
+    {{#each plants}}
+      <a href="/plants/{{id}}" class="plant-card">
+        {{#if image}}
+          <img src="{{image}}" alt="{{commonName}}" />
+        {{else}}
+          <div class="plant-thumb">{{commonName}}</div>
+        {{/if}}
+        <span class="plant-name">{{commonName}}</span>
+        <span class="text-muted"><em>{{scientificName}}</em></span>
+        <span class="plant-count">Found {{timesFound}} times</span>
+      </a>
+    {{else}}
+      <p>No plants yet. <a href="/identify">Identify your first plant</a>.</p>
+    {{/each}}
+  </div>
+
+  <a href="/identify" class="btn btn-success mt-3">Identify a plant</a>
+  <a href="/rewards" class="btn btn-outline-secondary mt-3">Rewards &amp; badges</a>
+</div>

@@ -6,7 +6,9 @@ const session = require('express-session');
 const validateRegistration = require('./validateRegistration');
 const { db } = require('./db');
 const path = require('path');
-const { getOrCreatePlant } = require('./plantHelpers');
+require('dotenv').config();
+const { getOrCreatePlant, getPlantDescription } = require('./plantHelpers');
+const { upload, identifyWithPlantNet } = require('./identify');
 const app = express();
 
 
@@ -147,6 +149,61 @@ app.get('/home', (req, res) => {
   res.render('pages/home', { user: req.session.user });
 });
 
+// -------------------------------------   IDENTIFY ROUTES   ----------------------------------------------
+app.get('/identify', (req, res) => {
+  res.render('pages/identify', { user: req.session.user });
+});
+
+app.post('/identify', (req, res) => {
+  upload.single('image')(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      return res.render('pages/identify', {
+        user: req.session.user, error: true, message: uploadErr.message,
+      });
+    }
+    if (!req.file) {
+      return res.render('pages/identify', {
+        user: req.session.user, error: true,
+        message: 'Choose a JPG or PNG photo first.',
+      });
+    }
+    try {
+      const result = await identifyWithPlantNet(req.file, req.body.organ);
+      const description = result.scientificName
+        ? await getPlantDescription(result.scientificName)
+        : 'No description available yet.';
+      res.render('pages/identify', {
+        user: req.session.user,
+        ...result,
+        description,
+        imagePath: `/resources/uploads/${req.file.filename}`,
+        location: (req.body.location || '').trim(),
+      });
+    } catch (err) {
+      console.error(err);
+      res.render('pages/identify', {
+        user: req.session.user, error: true, message: err.message,
+      });
+    }
+  });
+});
+
+app.post('/api/identify', (req, res) => {
+  upload.single('image')(req, res, async (uploadErr) => {
+    if (uploadErr) return res.status(400).json({ error: uploadErr.message });
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded. Send multipart field "image" as a File.' });
+    }
+    try {
+      const result = await identifyWithPlantNet(req.file, req.body.organ);
+      res.json({ ...result, imagePath: `/resources/uploads/${req.file.filename}` });
+    } catch (err) {
+      res.status(err.status || 500).json({ error: err.message, details: err.details || undefined });
+    }
+  });
+});
+
+
 app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
@@ -159,16 +216,27 @@ app.get('/collection', async (req, res) => {
 
   try {
     const plants = await db.any(
-      `SELECT p.plant_id, p.common_name, p.scientific_name,
-              up.image_path, up.location, up.found_at
+      `SELECT p.plant_id AS id,
+       p.common_name AS "commonName",
+       p.scientific_name AS "scientificName",
+       COUNT(*)::int AS "timesFound",
+       MAX(up.image_path) AS image,
+       MAX(up.found_at) AS "lastFound"
        FROM users_to_plants up
        JOIN plants p ON p.plant_id = up.plant_id
        WHERE up.user_id = $1
-       ORDER BY up.found_at DESC`,
+       GROUP BY p.plant_id, p.common_name, p.scientific_name
+       ORDER BY MAX(up.found_at) DESC`,
       [userId]
     );
 
-    res.render('pages/collection', { plants, user: req.session.user });
+    res.render('pages/collection', {
+  plants,
+  user: req.session.user,
+  totalSpecies: plants.length,
+  totalFinds: plants.reduce((sum, p) => sum + p.timesFound, 0),
+});
+
   } catch (err) {
     console.error(err);
     res.status(500).render('pages/collection', {

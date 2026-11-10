@@ -1,7 +1,9 @@
-{{!-- pages/identify.hbs — displays the parsed Pl@ntNet result.
-     Put this in your server's views/pages/ folder (in the API-only
-     slice: src/views/pages/identify.hbs). It expects the parsed fields
-     from parsePlantNetResponse in plant_name_index.js, not raw Pl@ntNet JSON. --}}
+{{!-- src/views/pages/identify.hbs — REPLACE the GitHub/local version with this.
+     Same upload form as before (POST /identify, JPG/PNG + organ),
+     plus the result popup: plant info + Wikipedia description, with a
+     "Save to Bloomdex" button that POSTs to /collection.
+     POST /collection is already in index.js — it saves the plant,
+     gives +10 points only for a new species, and awards badges. --}}
 <h2>Identify a plant</h2>
 
 <form action="/identify" method="POST" enctype="multipart/form-data">
@@ -28,15 +30,28 @@
 
 {{#if bestMatch}}
   <div class="card mt-4">
+    {{#if imagePath}}
+      <img src="{{imagePath}}" class="card-img-top" alt="{{commonName}}" />
+    {{/if}}
     <div class="card-body">
       <h3>{{commonName}}</h3>
       <p><em>{{scientificName}}</em></p>
       <p>Confidence: {{confidencePercent}}%</p>
       {{#if family}}<p>Family: {{family}}</p>{{/if}}
       {{#if predictedOrgan}}<p>Plant part seen: {{predictedOrgan}}</p>{{/if}}
+      {{#if description}}<p>{{description}}</p>{{/if}}
       {{#if remainingIdentificationRequests}}
         <p class="text-muted">Requests left: {{remainingIdentificationRequests}}</p>
       {{/if}}
+
+      {{!-- Save it: POST /collection (already in index.js). --}}
+      <form action="/collection" method="POST">
+        <input type="hidden" name="scientific_name" value="{{scientificName}}" />
+        <input type="hidden" name="common_name" value="{{commonName}}" />
+        <input type="hidden" name="image_path" value="{{imagePath}}" />
+        <input type="hidden" name="location" value="{{location}}" />
+        <button type="submit" class="btn btn-success">Save to Bloomdex</button>
+      </form>
     </div>
   </div>
   {{#if alternatives}}
