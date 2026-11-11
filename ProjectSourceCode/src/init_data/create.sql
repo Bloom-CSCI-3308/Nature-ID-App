@@ -2,8 +2,15 @@ CREATE TABLE IF NOT EXISTS users (
   user_id SERIAL PRIMARY KEY,        -- auto-numbering id
   username VARCHAR(50) UNIQUE NOT NULL,
   password CHAR(60) NOT NULL,        -- bcrypt hashes are 60 characters
+  email VARCHAR(254),                -- optional recovery email for resetting a forgotten password
   points INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash CHAR(64) PRIMARY KEY,   -- SHA-256 of the emailed reset token; the token itself is never stored
+  user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  expires_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS plants (

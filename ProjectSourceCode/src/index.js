@@ -3,7 +3,9 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const crypto = require('crypto');
 const validateRegistration = require('./validateRegistration');
+const { sendMail } = require('./mailer');
 const { db } = require('./db');
 const path = require('path');
 require('dotenv').config();
@@ -49,29 +51,41 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
   const username = (req.body.username || '').trim();
   const password = req.body.password || '';
+  // Optional recovery email, stored lowercase so it matches however it's typed later
+  const email = (req.body.email || '').trim().toLowerCase();
 
-  if (!validateRegistration({ username, password })) {
-  const message =
-    !username || !password
-      ? 'Username and password are required.'
-      : 'Username must be at most 50 characters and password 8–72 characters.';
-  return res.status(400).render('pages/register', {
-    username,
-    error: true,
-    message,
-  });
-}
+  if (!validateRegistration({ username, password, email })) {
+    let message;
+    if (!username || !password) {
+      message = 'Username and password are required.';
+    } else if (email && !validateRegistration.isValidEmail(email)) {
+      message = 'Enter a valid recovery email, or leave it blank.';
+    } else {
+      message = 'Username must be at most 50 characters and password 8–72 characters.';
+    }
+    return res.status(400).render('pages/register', {
+      username,
+      email,
+      error: true,
+      message,
+    });
+  }
 
 
   try {
     const hash = await bcrypt.hash(password, 10);
-    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
+    await db.none('INSERT INTO users (username, password, email) VALUES ($1, $2, $3)', [
+      username,
+      hash,
+      email || null,
+    ]);
     res.redirect('/login');
   } catch (err) {
     // 23505 = the username already exists
     if (err.code === '23505') {
       return res.status(400).render('pages/register', {
         username,
+        email,
         error: true,
         message: 'That username is already taken.',
       });
@@ -79,6 +93,7 @@ app.post('/register', async (req, res) => {
     console.error(err);
     res.status(500).render('pages/register', {
       username,
+      email,
       error: true,
       message: 'Something went wrong. Please try again.',
     });
@@ -86,7 +101,9 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.render('pages/login');
+  // A finished password reset lands on /login?reset=1
+  const message = req.query.reset ? 'Your password has been reset. Log in with your new password.' : undefined;
+  res.render('pages/login', { message });
 });
 
 app.post('/login', async (req, res) => {
@@ -131,6 +148,149 @@ app.post('/login', async (req, res) => {
 
 app.get('/welcome', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Welcome!' });
+});
+
+// -------------------------------------   PASSWORD RESET ROUTES   ----------------------------------------------
+// Reset links in emails start with this; set APP_URL in .env if the app runs somewhere else
+const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+const RESET_LINK_INVALID = 'That reset link is invalid or has expired. Request a new one below.';
+
+// Only a hash of each reset token is saved, so someone who sees the database still can't use the links
+const hashToken = token => crypto.createHash('sha256').update(token).digest('hex');
+
+app.get('/forgot-password', (req, res) => {
+  res.render('pages/forgot-password');
+});
+
+app.post('/forgot-password', async (req, res) => {
+  const account = typeof req.body.account === 'string' ? req.body.account.trim() : '';
+
+  if (!account) {
+    return res.status(400).render('pages/forgot-password', {
+      error: true,
+      message: 'Enter your username or recovery email.',
+    });
+  }
+
+  try {
+    const users = await db.any(
+      `SELECT user_id, username, email
+       FROM users
+       WHERE email IS NOT NULL AND (username = $1 OR email = LOWER($1))`,
+      [account]
+    );
+
+    for (const user of users) {
+      const token = crypto.randomBytes(32).toString('hex');
+
+      // A new request replaces the user's older link (and expired links are cleared out)
+      await db.tx(async t => {
+        await t.none('DELETE FROM password_resets WHERE user_id = $1 OR expires_at < NOW()', [user.user_id]);
+        await t.none(
+          `INSERT INTO password_resets (token_hash, user_id, expires_at)
+           VALUES ($1, $2, NOW() + INTERVAL '1 hour')`,
+          [hashToken(token), user.user_id]
+        );
+      });
+
+      // Not awaited, so the page responds the same way whether or not an email goes out
+      sendMail({
+        to: user.email,
+        subject: 'Reset your Bloom password',
+        text: [
+          `Hi ${user.username},`,
+          '',
+          'Someone asked to reset the password for your Bloom account. To choose a new password, open this link within 1 hour:',
+          '',
+          `${APP_URL}/reset-password?token=${token}`,
+          '',
+          "If this wasn't you, you can ignore this email. Your password won't change.",
+        ].join('\n'),
+      }).catch(err => console.error('Could not send reset email:', err));
+    }
+
+    // Same message whether or not the account exists, so this page can't be used to find accounts
+    res.render('pages/forgot-password', {
+      message: 'If that account has a recovery email, a reset link is on its way. The link works for 1 hour.',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/forgot-password', {
+      account,
+      error: true,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+});
+
+app.get('/reset-password', async (req, res) => {
+  const token = typeof req.query.token === 'string' ? req.query.token : '';
+
+  try {
+    const reset = await db.oneOrNone(
+      'SELECT 1 FROM password_resets WHERE token_hash = $1 AND expires_at > NOW()',
+      [hashToken(token)]
+    );
+    if (!reset) {
+      return res.status(400).render('pages/forgot-password', { error: true, message: RESET_LINK_INVALID });
+    }
+
+    res.render('pages/reset-password', { token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/forgot-password', {
+      error: true,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+});
+
+app.post('/reset-password', async (req, res) => {
+  const token = typeof req.body.token === 'string' ? req.body.token : '';
+  const password = req.body.password || '';
+  const confirmPassword = req.body.confirm_password || '';
+
+  let message;
+  if (!validateRegistration.isValidPassword(password)) {
+    message = 'Password must be 8–72 characters.';
+  } else if (password !== confirmPassword) {
+    message = 'The passwords do not match.';
+  }
+  if (message) {
+    return res.status(400).render('pages/reset-password', { token, error: true, message });
+  }
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+
+    const changed = await db.tx(async t => {
+      // Deleting the link as it's used means it only works once
+      const reset = await t.oneOrNone(
+        `DELETE FROM password_resets
+         WHERE token_hash = $1 AND expires_at > NOW()
+         RETURNING user_id`,
+        [hashToken(token)]
+      );
+      if (!reset) {
+        return false;
+      }
+      await t.none('UPDATE users SET password = $1 WHERE user_id = $2', [hash, reset.user_id]);
+      return true;
+    });
+
+    if (!changed) {
+      return res.status(400).render('pages/forgot-password', { error: true, message: RESET_LINK_INVALID });
+    }
+
+    res.redirect('/login?reset=1');
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('pages/reset-password', {
+      token,
+      error: true,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
 });
 
 // -------------------------------------   AUTH MIDDLEWARE   ----------------------------------------------

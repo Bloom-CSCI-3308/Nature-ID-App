@@ -19,6 +19,8 @@ services:
     environment:
       - DB_HOST=db
       - PORT=3000
+      # Password reset emails link here (the app is on port 3001 on your computer)
+      - APP_URL=${APP_URL:-http://localhost:3001}
     depends_on:
       - db
 
