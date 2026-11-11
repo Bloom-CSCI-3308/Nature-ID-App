@@ -27,4 +27,16 @@ describe('validateRegistration', () => {
       validateRegistration({ username: 'nicholas', password: 'TestPassword123!' })
     ).to.equal(true);
   });
+
+  it('returns true with a valid recovery email', () => {
+    expect(
+      validateRegistration({ username: 'justin', password: 'TestPassword123!', email: 'justin@example.com' })
+    ).to.equal(true);
+  });
+
+  it('returns false when the recovery email is not an email', () => {
+    expect(
+      validateRegistration({ username: 'justin', password: 'TestPassword123!', email: 'not-an-email' })
+    ).to.equal(false);
+  });
 });

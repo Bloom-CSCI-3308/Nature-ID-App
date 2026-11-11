@@ -1,6 +1,6 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const { randomUUID } = require('crypto');
+const { randomUUID, createHash } = require('crypto');
 const bcrypt = require('bcryptjs');
 const app = require('../src/index');
 const { db, pgp } = require('../src/db');
@@ -65,6 +65,43 @@ describe('POST /register', () => {
       .send({ username });
 
     expect(res).to.have.status(400);
+
+    const user = await db.oneOrNone(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+    expect(user).to.equal(null);
+  });
+
+  it('saves the recovery email in lowercase', async () => {
+    const username = `lab10_${randomUUID()}`;
+
+    const res = await chai
+      .request(app)
+      .post('/register')
+      .redirects(0)
+      .type('form')
+      .send({ username, password: 'TestPassword123!', email: '  Justin@Example.com ' });
+
+    expect(res).to.have.status(302);
+
+    const user = await db.one('SELECT email FROM users WHERE username = $1', [username]);
+    expect(user.email).to.equal('justin@example.com');
+
+    await db.none('DELETE FROM users WHERE username = $1', [username]);
+  });
+
+  it('rejects an invalid recovery email and saves nothing', async () => {
+    const username = `lab10_${randomUUID()}`;
+
+    const res = await chai
+      .request(app)
+      .post('/register')
+      .type('form')
+      .send({ username, password: 'TestPassword123!', email: 'not-an-email' });
+
+    expect(res).to.have.status(400);
+    expect(res.text).to.include('Enter a valid recovery email');
 
     const user = await db.oneOrNone(
       'SELECT * FROM users WHERE username = $1',
@@ -233,5 +270,130 @@ describe('Collection and rewards routes', () => {
     expect(res.text).to.include('earned');
     expect(res.text).to.include('Trail Scout');
     expect(res.text).to.include('locked');
+  });
+});
+
+describe('Forgot password', () => {
+  const password = 'TestPassword123!';
+  const newPassword = 'NewPassword456!';
+  let username;
+  let userId;
+
+  // Tests can't open the email, so the ones that need a reset link save one directly
+  const saveResetLink = async (token, expiresIn = '1 hour') => {
+    await db.none(
+      `INSERT INTO password_resets (token_hash, user_id, expires_at)
+       VALUES ($1, $2, NOW() + $3::interval)`,
+      [createHash('sha256').update(token).digest('hex'), userId, expiresIn]
+    );
+  };
+
+  // Arrange: a fresh user with a recovery email
+  beforeEach(async () => {
+    username = `lab10_${randomUUID()}`;
+    await chai
+      .request(app)
+      .post('/register')
+      .redirects(0)
+      .type('form')
+      .send({ username, password, email: `${username}@example.com` });
+
+    const user = await db.one('SELECT user_id FROM users WHERE username = $1', [username]);
+    userId = user.user_id;
+  });
+
+  // ON DELETE CASCADE also removes this user's reset links
+  afterEach(async () => {
+    await db.none('DELETE FROM users WHERE username = $1', [username]);
+  });
+
+  it('creates a reset link for an account with a recovery email', async () => {
+    const res = await chai
+      .request(app)
+      .post('/forgot-password')
+      .type('form')
+      .send({ account: username });
+
+    expect(res).to.have.status(200);
+    expect(res.text).to.include('a reset link is on its way');
+
+    const links = await db.any('SELECT * FROM password_resets WHERE user_id = $1', [userId]);
+    expect(links).to.have.length(1);
+  });
+
+  it('shows the same message for an account that does not exist', async () => {
+    const res = await chai
+      .request(app)
+      .post('/forgot-password')
+      .type('form')
+      .send({ account: `nobody_${randomUUID()}` });
+
+    expect(res).to.have.status(200);
+    expect(res.text).to.include('a reset link is on its way');
+  });
+
+  it('resets the password with a valid link, and the link only works once', async () => {
+    const token = randomUUID();
+    await saveResetLink(token);
+
+    const res = await chai
+      .request(app)
+      .post('/reset-password')
+      .redirects(0)
+      .type('form')
+      .send({ token, password: newPassword, confirm_password: newPassword });
+
+    expect(res).to.have.status(302);
+    expect(res).to.have.header('location', '/login?reset=1');
+
+    const login = await chai
+      .request(app)
+      .post('/login')
+      .redirects(0)
+      .type('form')
+      .send({ username, password: newPassword });
+    expect(login).to.have.header('location', '/home');
+
+    const reuse = await chai
+      .request(app)
+      .post('/reset-password')
+      .type('form')
+      .send({ token, password: 'AnotherPassword789!', confirm_password: 'AnotherPassword789!' });
+    expect(reuse).to.have.status(400);
+    expect(reuse.text).to.include('invalid or has expired');
+  });
+
+  it('rejects an expired link and keeps the old password', async () => {
+    const token = randomUUID();
+    await saveResetLink(token, '-1 minute');
+
+    const res = await chai
+      .request(app)
+      .post('/reset-password')
+      .type('form')
+      .send({ token, password: newPassword, confirm_password: newPassword });
+
+    expect(res).to.have.status(400);
+    expect(res.text).to.include('invalid or has expired');
+
+    const user = await db.one('SELECT password FROM users WHERE user_id = $1', [userId]);
+    expect(await bcrypt.compare(password, user.password)).to.equal(true);
+  });
+
+  it('rejects passwords that do not match and keeps the link usable', async () => {
+    const token = randomUUID();
+    await saveResetLink(token);
+
+    const res = await chai
+      .request(app)
+      .post('/reset-password')
+      .type('form')
+      .send({ token, password: newPassword, confirm_password: 'Different123!' });
+
+    expect(res).to.have.status(400);
+    expect(res.text).to.include('The passwords do not match.');
+
+    const page = await chai.request(app).get(`/reset-password?token=${token}`);
+    expect(page).to.have.status(200);
   });
 });

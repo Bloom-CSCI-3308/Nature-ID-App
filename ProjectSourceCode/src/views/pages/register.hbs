@@ -8,8 +8,13 @@
 
   <form action="/register" method="POST" class="login-form">
     <div class="mb-3 text-start">
-      <label for="username" class="form-label">📧 Username</label>
+      <label for="username" class="form-label">👤 Username</label>
       <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="{{username}}" required />
+    </div>
+    <div class="mb-3 text-start">
+      <label for="email" class="form-label">📧 Recovery email <span class="text-muted small">(optional)</span></label>
+      <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" value="{{email}}" maxlength="254" />
+      <div class="form-text">Used to reset your password if you forget it.</div>
     </div>
     <div class="mb-3 text-start">
       <label for="password" class="form-label">🔒 Password</label>
