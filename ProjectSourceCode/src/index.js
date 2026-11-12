@@ -309,6 +309,12 @@ app.get('/home', (req, res) => {
   res.render('pages/home', { user: req.session.user });
 });
 
+app.get('/settings', (req, res) => {
+  res.render('pages/settings', { user: req.session.user });
+});
+
+
+
 // -------------------------------------   IDENTIFY ROUTES   ----------------------------------------------
 app.get('/identify', (req, res) => {
   res.render('pages/identify', { user: req.session.user });
