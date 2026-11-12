@@ -1,4 +1,7 @@
 <div class="plant-detail-page">
+  {{#if badgeMessage}}
+    <div class="alert alert-success" role="status">🏅 {{badgeMessage}}</div>
+  {{/if}}
   <header class="top-bar">
     <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
     <span class="ms-auto small text-muted">Date found: {{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>

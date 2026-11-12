@@ -271,6 +271,23 @@ describe('Collection and rewards routes', () => {
     expect(res.text).to.include('Trail Scout');
     expect(res.text).to.include('locked');
   });
+
+  it('shows a "Badge unlocked" message after earning a badge', async () => {
+    const saveRes = await agent
+      .post('/collection')
+      .redirects(0)
+      .type('form')
+      .send({ scientific_name: scientificName, common_name: 'Colorado Blue Columbine' });
+
+    // Follow the redirect to the plant page, where the message appears
+    const pageRes = await agent.get(saveRes.headers.location);
+    expect(pageRes).to.have.status(200);
+    expect(pageRes.text).to.include('Badge unlocked: First Find!');
+
+    // The message only shows once
+    const againRes = await agent.get(saveRes.headers.location);
+    expect(againRes.text).to.not.include('Badge unlocked');
+  });
 });
 
 describe('Forgot password', () => {
