@@ -446,7 +446,11 @@ app.get('/plants/:id', async (req, res) => {
       return res.redirect('/collection');
     }
 
-    res.render('pages/plant-detail', { plant, user: req.session.user });
+    // Show the badge message once, then clear it
+    const badgeMessage = req.session.badgeMessage;
+    delete req.session.badgeMessage;
+
+    res.render('pages/plant-detail', { plant, user: req.session.user, badgeMessage });
   } catch (err) {
     console.error(err);
     res.redirect('/collection');
@@ -477,7 +481,7 @@ app.post('/collection', async (req, res) => {
     // Done before the transaction so the Wikipedia request doesn't hold it open.
     const plantId = await getOrCreatePlant(db, scientificName, commonName);
 
-    await db.tx(async t => {
+    const newBadges = await db.tx(async t => {
       // Has this user found this species before?
       const alreadyFound = await t.oneOrNone(
         'SELECT 1 FROM users_to_plants WHERE user_id = $1 AND plant_id = $2 LIMIT 1',
@@ -498,20 +502,33 @@ app.post('/collection', async (req, res) => {
         ]);
       }
 
-      // Award every badge the user now qualifies for (already-earned ones are skipped)
-      await t.none(
-        `INSERT INTO users_to_badges (user_id, badge_id)
-         SELECT $1, b.badge_id
-         FROM badges b
-         WHERE b.badge_requirements <= (
-           SELECT COUNT(DISTINCT plant_id) FROM users_to_plants WHERE user_id = $1
+      // Award every badge the user now qualifies for (already-earned ones are skipped),
+      // and return the names of the badges that were just unlocked
+      return t.any(
+        `WITH inserted AS (
+           INSERT INTO users_to_badges (user_id, badge_id)
+           SELECT $1, b.badge_id
+           FROM badges b
+           WHERE b.badge_requirements <= (
+             SELECT COUNT(DISTINCT plant_id) FROM users_to_plants WHERE user_id = $1
+           )
+           ON CONFLICT (user_id, badge_id) DO NOTHING
+           RETURNING badge_id
          )
-         ON CONFLICT (user_id, badge_id) DO NOTHING`,
+         SELECT b.badge_name
+         FROM inserted i
+         JOIN badges b ON b.badge_id = i.badge_id
+         ORDER BY b.badge_requirements`,
         [userId]
       );
     });
 
-    res.redirect(`/plants/${plantId}`);
+    // Show a one-time "Badge unlocked" message on the next page
+    if (newBadges.length > 0) {
+      req.session.badgeMessage = `Badge unlocked: ${newBadges.map(b => b.badge_name).join(', ')}!`;
+    }
+
+    req.session.save(() => res.redirect(`/plants/${plantId}`));
   } catch (err) {
     console.error(err);
     res.status(500).render('pages/home', {
