@@ -224,7 +224,11 @@ body { background: #e9ecef; }
 @media (min-width: 768px){
   .phone-shell,
   .bottom-nav{
-    max-width: 1000px;
+    max-width: none;
+  }
+  .phone-shell{
+    border-left: none;
+    border-right: none;
   }
   .plant-grid{
     grid-template-columns:repeat(4, 1fr) ;
