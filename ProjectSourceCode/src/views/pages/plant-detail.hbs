@@ -10,7 +10,9 @@
   <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
 
   <div class="plant-detail-body">
-    {{#if plant.image}}
+    {{#if plant.organ}}
+      <img src="/assets/organ-{{plant.organ}}.png" alt="{{plant.commonName}}" class="plant-detail-img" />
+    {{else if plant.image}}
       <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-detail-img" />
     {{else}}
       <div class="plant-detail-img placeholder">🌾</div>
@@ -24,4 +26,29 @@
   </div>
 
   <a href="/collection" class="btn btn-outline-secondary mt-3">← Back to Bloomdex</a>
+
+  <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#removeModal">
+    Remove from Bloomdex
+  </button>
+
+  <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="removeModalLabel">Remove from Bloomdex?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to remove <strong>{{plant.commonName}}</strong> from your Bloomdex?</p>
+          <p class="text-danger mb-0">This cannot be restored. You will need to identify the plant again to add it back.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="/plants/{{plant.id}}/remove" method="POST" class="m-0">
+            <button type="submit" class="btn btn-danger">Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS users_to_plants (
   location VARCHAR(100),
   found_at TIMESTAMP DEFAULT NOW(),
   image_path VARCHAR(300)
+  organ VARCHAR(20)
 );
 CREATE TABLE IF NOT EXISTS badges (
 badge_id SERIAL PRIMARY KEY,

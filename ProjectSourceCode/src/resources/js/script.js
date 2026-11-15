@@ -1,13 +1,19 @@
-// src/resources/js/script.js — REPLACE.
-// Shutter now lives in the bottom nav (footer.hbs, #take-photo-btn).
-//   - On /home (camera page): it takes the photo.
-//   - On any other page: it goes to /home, the camera page.
-// After a capture, Retake / Use This Photo appear in a floating row
-// just above the bottom nav (#capture-actions in home.hbs).
-// Upload (top-right) still works: picking a photo auto-submits to
-// POST /identify.
-
 document.addEventListener('DOMContentLoaded', () => {
+  // Theme picker (Appearance page)
+  const themeRadios = document.querySelectorAll('input[name="theme"]');
+  if (themeRadios.length > 0) {
+    const saved = localStorage.getItem('bloom-theme') || 'system';
+    themeRadios.forEach((radio) => {
+      radio.checked = radio.value === saved;
+      radio.addEventListener('change', () => {
+        localStorage.setItem('bloom-theme', radio.value);
+        const dark = radio.value === 'dark' ||
+          (radio.value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      });
+    });
+  }
+
   const form = document.getElementById('take-photo-form');
   const input = document.querySelector('input[type="file"][name="image"]');
 

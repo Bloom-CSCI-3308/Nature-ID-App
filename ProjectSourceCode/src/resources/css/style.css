@@ -221,3 +221,16 @@ body { background: #e9ecef; }
   opacity: 0.5;
 }
 
+
+
+/* Dark mode — overrides, only when data-theme="dark" is on <html> */
+[data-theme="dark"] body { background: #121212; }
+[data-theme="dark"] .phone-shell { background: #1e1e1e; border-color: #333; color: #f1f1f1; }
+[data-theme="dark"] .bottom-nav { background: #1e1e1e; border-top-color: #333; }
+[data-theme="dark"] .bottom-nav .nav-item { color: #f1f1f1; }
+[data-theme="dark"] .settings-item { color: #f1f1f1; border-bottom-color: #333; }
+[data-theme="dark"] .back-link { color: #f1f1f1; }
+[data-theme="dark"] .plant-card { color: #f1f1f1; border-color: #333; }
+[data-theme="dark"] .badge-card { border-color: #333; }
+[data-theme="dark"] .camera-view { border-color: #333; }
+[data-theme="dark"] .text-muted { color: #aaa !important; }

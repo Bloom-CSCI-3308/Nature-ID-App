@@ -31,6 +31,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use('/resources', express.static(path.join(__dirname, 'resources')));
+app.use('/assets', express.static(path.join(__dirname, '..', 'Assets')));
 
 app.use(
   session({
@@ -315,6 +316,129 @@ app.get('/settings', (req, res) => {
 
 
 
+// -------------------------------------   SETTINGS ROUTES   ----------------------------------------------
+// Helper used by every Account render. It loads the email from the DB, but
+// falls back to a blank email (instead of erroring the whole page) if the
+// local users table was created before the email column was added — run:
+//   ALTER TABLE users ADD COLUMN email VARCHAR(254);
+async function loadAccountPage(req, res, options = {}) {
+  let email = null;
+  try {
+    const row = await db.oneOrNone('SELECT email FROM users WHERE user_id = $1', [req.session.user.user_id]);
+    email = row ? row.email : null;
+  } catch (err) {
+    console.error('Could not load account email:', err.message || err);
+  }
+  res.status(options.status || 200).render('pages/settings/account', {
+    user: req.session.user,
+    email,
+    message: options.message,
+    error: options.error || false,
+  });
+}
+
+app.get('/settings', (req, res) => {
+  res.render('pages/settings', { user: req.session.user });
+});
+
+app.get('/settings/appearance', (req, res) => {
+  res.render('pages/settings/appearance', { user: req.session.user });
+});
+
+app.get('/settings/about', (req, res) => {
+  res.render('pages/settings/about', { user: req.session.user });
+});
+
+app.get('/settings/notifications', (req, res) => {
+  res.render('pages/settings/notifications', { user: req.session.user });
+});
+
+app.get('/settings/privacy', (req, res) => {
+  res.render('pages/settings/privacy', { user: req.session.user });
+});
+
+app.get('/settings/account', async (req, res) => {
+  await loadAccountPage(req, res);
+});
+
+app.post('/settings/account/username', async (req, res) => {
+  const newUsername = (req.body.username || '').trim();
+  const currentPassword = req.body.currentPassword || '';
+
+  if (!newUsername || newUsername.length > 50) {
+    return loadAccountPage(req, res, { message: 'Username must be 1–50 characters.', error: true, status: 400 });
+  }
+
+  try {
+    const user = await db.one('SELECT password FROM users WHERE user_id = $1', [req.session.user.user_id]);
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return loadAccountPage(req, res, { message: 'Current password is incorrect.', error: true, status: 400 });
+    }
+
+    await db.none('UPDATE users SET username = $1 WHERE user_id = $2', [newUsername, req.session.user.user_id]);
+    req.session.user.username = newUsername;
+    return loadAccountPage(req, res, { message: 'Username updated.' });
+  } catch (err) {
+    if (err.code === '23505') {
+      return loadAccountPage(req, res, { message: 'That username is already taken.', error: true, status: 400 });
+    }
+    console.error(err);
+    return loadAccountPage(req, res, { message: 'Something went wrong. Please try again.', error: true, status: 500 });
+  }
+});
+
+app.post('/settings/account/email', async (req, res) => {
+  const email = (req.body.email || '').trim().toLowerCase();
+  const currentPassword = req.body.currentPassword || '';
+
+  if (email && !validateRegistration.isValidEmail(email)) {
+    return loadAccountPage(req, res, { message: 'Enter a valid recovery email, or leave it blank.', error: true, status: 400 });
+  }
+
+  try {
+    const user = await db.one('SELECT password FROM users WHERE user_id = $1', [req.session.user.user_id]);
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return loadAccountPage(req, res, { message: 'Current password is incorrect.', error: true, status: 400 });
+    }
+
+    await db.none('UPDATE users SET email = $1 WHERE user_id = $2', [email || null, req.session.user.user_id]);
+    return loadAccountPage(req, res, { message: 'Recovery email saved.' });
+  } catch (err) {
+    console.error(err);
+    return loadAccountPage(req, res, { message: 'Something went wrong. Please try again.', error: true, status: 500 });
+  }
+});
+
+app.post('/settings/account/password', async (req, res) => {
+  const currentPassword = req.body.currentPassword || '';
+  const newPassword = req.body.newPassword || '';
+  const confirmPassword = req.body.confirmPassword || '';
+
+  if (!validateRegistration.isValidPassword(newPassword)) {
+    return loadAccountPage(req, res, { message: 'New password must be 8–72 characters.', error: true, status: 400 });
+  }
+  if (newPassword !== confirmPassword) {
+    return loadAccountPage(req, res, { message: 'The new passwords do not match.', error: true, status: 400 });
+  }
+
+  try {
+    const user = await db.one('SELECT password FROM users WHERE user_id = $1', [req.session.user.user_id]);
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return loadAccountPage(req, res, { message: 'Current password is incorrect.', error: true, status: 400 });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await db.none('UPDATE users SET password = $1 WHERE user_id = $2', [hash, req.session.user.user_id]);
+    return loadAccountPage(req, res, { message: 'Password updated.' });
+  } catch (err) {
+    console.error(err);
+    return loadAccountPage(req, res, { message: 'Something went wrong. Please try again.', error: true, status: 500 });
+  }
+});
+
 // -------------------------------------   IDENTIFY ROUTES   ----------------------------------------------
 app.get('/identify', (req, res) => {
   res.render('pages/identify', { user: req.session.user });
@@ -387,6 +511,7 @@ app.get('/collection', async (req, res) => {
        p.scientific_name AS "scientificName",
        COUNT(*)::int AS "timesFound",
        MAX(up.image_path) AS image,
+       MAX(up.organ) AS organ,
        MAX(up.found_at) AS "lastFound"
        FROM users_to_plants up
        JOIN plants p ON p.plant_id = up.plant_id
@@ -431,6 +556,7 @@ app.get('/plants/:id', async (req, res) => {
               p.scientific_name AS "scientificName",
               p.plant_description AS description,
               up.image_path AS image,
+              up.organ AS organ,
               up.location,
               TO_CHAR(up.found_at, 'Mon DD, YYYY') AS "dateFound"
        FROM users_to_plants up
@@ -457,6 +583,28 @@ app.get('/plants/:id', async (req, res) => {
   }
 });
 
+
+// Remove a plant from the logged-in user's Bloomdex
+app.post('/plants/:id/remove', async (req, res) => {
+  const userId = req.session.user.user_id;
+  const plantId = parseInt(req.params.id, 10);
+
+  if (!Number.isInteger(plantId) || plantId < 1) {
+    return res.redirect('/collection');
+  }
+
+  try {
+    await db.none(
+      'DELETE FROM users_to_plants WHERE user_id = $1 AND plant_id = $2',
+      [userId, plantId]
+    );
+  } catch (err) {
+    console.error(err);
+  }
+
+  res.redirect('/collection');
+});
+
 const POINTS_PER_NEW_PLANT = 10;
 
 // Save an identified plant to the logged-in user's collection,
@@ -467,6 +615,7 @@ app.post('/collection', async (req, res) => {
   const commonName = (req.body.common_name || '').trim();
   const imagePath = req.body.image_path || null;
   const location = (req.body.location || '').trim() || null;
+  const organ = ['leaf', 'flower', 'fruit', 'bark'].includes(req.body.organ) ? req.body.organ : null;
 
   if (!scientificName) {
     return res.status(400).render('pages/home', {
@@ -489,9 +638,9 @@ app.post('/collection', async (req, res) => {
       );
 
       await t.none(
-        `INSERT INTO users_to_plants (user_id, plant_id, image_path, location)
-         VALUES ($1, $2, $3, $4)`,
-        [userId, plantId, imagePath, location]
+        `INSERT INTO users_to_plants (user_id, plant_id, image_path, location, organ)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, plantId, imagePath, location, organ]
       );
 
       // Points only for a species that's new to this user

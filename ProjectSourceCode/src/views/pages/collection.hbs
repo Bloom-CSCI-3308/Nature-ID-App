@@ -17,7 +17,9 @@
   <div class="plant-grid">
     {{#each plants}}
       <a href="/plants/{{id}}" class="plant-card">
-        {{#if image}}
+        {{#if organ}}
+          <img src="/assets/organ-{{organ}}.png" alt="{{commonName}}" />
+        {{else if image}}
           <img src="{{image}}" alt="{{commonName}}" />
         {{else}}
           <div class="plant-thumb">{{commonName}}</div>

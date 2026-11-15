@@ -1,0 +1,46 @@
+<div class="settings-page">
+  <header class="top-bar">
+    <a href="/settings" class="back-link" aria-label="Back">←</a>
+    <h2 class="settings-title">Account</h2>
+  </header>
+
+  {{#if message}}
+  {{#if error}}
+    <div class="alert alert-danger">{{message}}</div>
+  {{else}}
+    <div class="alert alert-success">{{message}}</div>
+  {{/if}}
+{{/if}}
+
+
+  <h5>Username</h5>
+  <p class="text-muted">Signed in as <strong>{{user.username}}</strong></p>
+  <form action="/settings/account/username" method="POST" class="mb-4">
+    <label class="form-label">New username</label>
+    <input type="text" name="username" class="form-control mb-2" value="{{user.username}}" maxlength="50" required />
+    <label class="form-label">Current password</label>
+    <input type="password" name="currentPassword" class="form-control mb-2" required />
+    <button type="submit" class="btn btn-success">Change username</button>
+  </form>
+
+  <h5>Recovery email</h5>
+  <p class="text-muted">Used only to reset your password if you forget it.</p>
+  <form action="/settings/account/email" method="POST" class="mb-4">
+    <label class="form-label">Email</label>
+    <input type="email" name="email" class="form-control mb-2" value="{{email}}" placeholder="you@example.com" />
+    <label class="form-label">Current password</label>
+    <input type="password" name="currentPassword" class="form-control mb-2" required />
+    <button type="submit" class="btn btn-success">Save email</button>
+  </form>
+
+  <h5>Password</h5>
+  <form action="/settings/account/password" method="POST" class="mb-4">
+    <label class="form-label">Current password</label>
+    <input type="password" name="currentPassword" class="form-control mb-2" required />
+    <label class="form-label">New password</label>
+    <input type="password" name="newPassword" class="form-control mb-2" minlength="8" maxlength="72" required />
+    <label class="form-label">Confirm new password</label>
+    <input type="password" name="confirmPassword" class="form-control mb-2" required />
+    <button type="submit" class="btn btn-success">Change password</button>
+  </form>
+</div>
