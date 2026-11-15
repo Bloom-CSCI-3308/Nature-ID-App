@@ -313,6 +313,24 @@ app.get('/settings', (req, res) => {
   res.render('pages/settings', { user: req.session.user });
 });
 
+// Each item on the Settings page opens its own page
+const SETTINGS_PAGES = {
+  account: { title: 'Account', text: 'Account settings are coming soon.' },
+  notifications: { title: 'Notifications', text: 'Notification settings are coming soon.' },
+  privacy: { title: 'Privacy', text: 'Privacy settings are coming soon.' },
+  about: {
+    title: 'About Bloom',
+    text: 'Bloom identifies plants from a photo. Save the plants you find to your collection and earn points and badges as you explore.',
+  },
+};
+
+app.get('/settings/:page', (req, res) => {
+  if (!Object.hasOwn(SETTINGS_PAGES, req.params.page)) {
+    return res.redirect('/settings');
+  }
+  res.render('pages/settings-page', { user: req.session.user, ...SETTINGS_PAGES[req.params.page] });
+});
+
 
 
 // -------------------------------------   IDENTIFY ROUTES   ----------------------------------------------
