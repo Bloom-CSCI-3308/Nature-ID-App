@@ -288,6 +288,44 @@ describe('Collection and rewards routes', () => {
     const againRes = await agent.get(saveRes.headers.location);
     expect(againRes.text).to.not.include('Badge unlocked');
   });
+
+  it('takes back points when a plant is removed', async () => {
+    const plant = await db.one('SELECT plant_id FROM plants WHERE scientific_name = $1', [
+      scientificName,
+    ]);
+    const form = { scientific_name: scientificName, common_name: 'Colorado Blue Columbine' };
+
+    await agent.post('/collection').redirects(0).type('form').send(form);
+    const res = await agent.post(`/plants/${plant.plant_id}/remove`).redirects(0);
+
+    expect(res).to.have.status(302);
+    expect(res).to.have.header('location', '/collection');
+
+    const user = await db.one('SELECT points FROM users WHERE user_id = $1', [userId]);
+    expect(user.points).to.equal(0);
+
+    const finds = await db.one(
+      'SELECT COUNT(*)::int AS count FROM users_to_plants WHERE user_id = $1',
+      [userId]
+    );
+    expect(finds.count).to.equal(0);
+  });
+
+  it('does not allow farming points by removing and re-adding a plant', async () => {
+    const plant = await db.one('SELECT plant_id FROM plants WHERE scientific_name = $1', [
+      scientificName,
+    ]);
+    const form = { scientific_name: scientificName, common_name: 'Colorado Blue Columbine' };
+
+    // Add → remove → add the same plant
+    await agent.post('/collection').redirects(0).type('form').send(form);
+    await agent.post(`/plants/${plant.plant_id}/remove`).redirects(0);
+    await agent.post('/collection').redirects(0).type('form').send(form);
+
+    // Same as adding it once: 10 points, not 20
+    const user = await db.one('SELECT points FROM users WHERE user_id = $1', [userId]);
+    expect(user.points).to.equal(10);
+  });
 });
 
 describe('Forgot password', () => {

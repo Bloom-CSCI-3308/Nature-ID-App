@@ -619,7 +619,11 @@ app.get('/plants/:id', async (req, res) => {
 });
 
 
-// Remove a plant from the logged-in user's Bloomdex
+const POINTS_PER_NEW_PLANT = 10;
+
+// Remove a plant from the logged-in user's Bloomdex.
+// Takes back the points it earned, so removing and re-adding a plant
+// can't be used to farm unlimited points.
 app.post('/plants/:id/remove', async (req, res) => {
   const userId = req.session.user.user_id;
   const plantId = parseInt(req.params.id, 10);
@@ -629,18 +633,29 @@ app.post('/plants/:id/remove', async (req, res) => {
   }
 
   try {
-    await db.none(
-      'DELETE FROM users_to_plants WHERE user_id = $1 AND plant_id = $2',
-      [userId, plantId]
-    );
+    await db.tx(async t => {
+      // How many of this user's sightings of the plant were deleted
+      const removed = await t.result(
+        'DELETE FROM users_to_plants WHERE user_id = $1 AND plant_id = $2',
+        [userId, plantId],
+        r => r.rowCount
+      );
+
+      // Only take points back if the plant was actually in their collection,
+      // and never let points go below 0
+      if (removed > 0) {
+        await t.none(
+          'UPDATE users SET points = GREATEST(points - $1, 0) WHERE user_id = $2',
+          [POINTS_PER_NEW_PLANT, userId]
+        );
+      }
+    });
   } catch (err) {
     console.error(err);
   }
 
   res.redirect('/collection');
 });
-
-const POINTS_PER_NEW_PLANT = 10;
 
 // Save an identified plant to the logged-in user's collection,
 // award points for new species, and unlock any badges they now qualify for
