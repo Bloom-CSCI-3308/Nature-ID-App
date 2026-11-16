@@ -1,8 +1,8 @@
-body { background: #e9ecef; }
+body { background: #ffffff; }
 .phone-shell {
   max-width: 430px;
   margin: 0 auto;
-  background: #fff;
+  background: #ffffff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -43,7 +43,13 @@ body { background: #e9ecef; }
 .login-page { padding-top: 3rem; }
 .logo-circle { font-size: 4rem; }
 .logo-text { font-weight: 700; margin-bottom: 2rem; }
-.login-form { max-width: 320px; margin: 0 auto; }
+.login-form { 
+  max-width: 320px; 
+  margin: 0 auto;
+  padding: 1.5rem; 
+  border: 1.5px solid #dee2e6;  
+  border-radius: 16px; 
+ }
 
 /* Profile */
 .profile-icon { font-size: 3.5rem; }
