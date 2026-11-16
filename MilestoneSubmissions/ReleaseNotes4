@@ -1,1 +1,4 @@
-
+Tariq - 
+Updated the UI of the register and login pages, made the layout expand to use available space on larger screens such 
+as laptops and desktops, resolved formatting issues for different screen sizes, fixed the route paths to the settings page so that 
+it loads correctly.
