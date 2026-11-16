@@ -2,3 +2,10 @@ Tariq -
 Updated the UI of the register and login pages, made the layout expand to use available space on larger screens such 
 as laptops and desktops, resolved formatting issues for different screen sizes, fixed the route paths to the settings page so that 
 it loads correctly.
+
+Nicholas - Built the tiered Bloomdex icons and the 1,000-species plant catalogue, and fixed the plant-detail page layout.
+
+Tiered organ icons: 12 icons (Common / Rare / Legendary for leaf, flower, fruit, bark), with rarity driven by IUCN status and capped at Rare when IUCN is unknown.
+Plant catalogue: seeded 1,000 species (998 distinct) with family, common type, and IUCN status/rarity; plant detail now shows family, type, and IUCN, and Pl@ntNet results backfill a real common name.
+Plant-detail page: centered layout with images that scale with the page instead of cropping into wide rectangles.
+Settings page: started the settings pages — Appearance, About, Notifications, and Account, with a GET /settings route.
