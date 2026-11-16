@@ -9,3 +9,11 @@ Tiered organ icons: 12 icons (Common / Rare / Legendary for leaf, flower, fruit,
 Plant catalogue: seeded 1,000 species (998 distinct) with family, common type, and IUCN status/rarity; plant detail now shows family, type, and IUCN, and Pl@ntNet results backfill a real common name.
 Plant-detail page: centered layout with images that scale with the page instead of cropping into wide rectangles.
 Settings page: started the settings pages — Appearance, About, Notifications, and Account, with a GET /settings route.
+
+Simon - Simon - This week I worked on three main things:
+
+1. **Badge unlocked message:** I added a "Badge unlocked" message that shows up on the plant page when a user earns a new badge, so users know right away when they've unlocked something. It only shows once, and I added a test for it. This finished the last part of my "Earn points and badges" user story.
+
+2. **Points exploit fix:** I found and fixed a bug where users could earn unlimited points by removing a plant from their Bloomdex and adding it again. Now removing a plant takes back its points, and I added two tests that prove adding, removing, and re-adding a plant only gives 10 points.
+
+3. **Database setup fixes and testing:** I fixed two bugs that stopped the database from being created for anyone who reset it, a missing comma in create.sql and a SQL file running before the tables existed. I also got the full app running locally and tested it on my phone, which helped me find a setup issue with the API key and a bug where plant names were being saved with the author's name attached.
