@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS users_to_plants (
   plant_id INT NOT NULL REFERENCES plants(plant_id) ON DELETE CASCADE,
   location VARCHAR(100),
   found_at TIMESTAMP DEFAULT NOW(),
-  image_path VARCHAR(300)
+  image_path VARCHAR(300),
   organ VARCHAR(20)
 );
 CREATE TABLE IF NOT EXISTS badges (
