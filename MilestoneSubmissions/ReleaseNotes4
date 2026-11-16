@@ -17,3 +17,18 @@ Simon - Simon - This week I worked on three main things:
 2. **Points exploit fix:** I found and fixed a bug where users could earn unlimited points by removing a plant from their Bloomdex and adding it again. Now removing a plant takes back its points, and I added two tests that prove adding, removing, and re-adding a plant only gives 10 points.
 
 3. **Database setup fixes and testing:** I fixed two bugs that stopped the database from being created for anyone who reset it, a missing comma in create.sql and a SQL file running before the tables existed. I also got the full app running locally and tested it on my phone, which helped me find a setup issue with the API key and a bug where plant names were being saved with the author's name attached.
+
+Justin - Finished password reset by email and made every Settings page load correctly.
+
+1. **Forgot password (PR #31):** Users who forget their password can now reset it by email.
+register.hbs: added an optional recovery email to sign-up. Invalid emails are rejected.
+login.hbs: added a "Forgot Password?" link.
+src/index.js, /forgot-password and /reset-password: sends a reset link that expires after 1 hour and only works once. The page shows the same message whether or not the account exists.
+create.sql: added an email column to users and a password_resets table that stores only a hash of each token.
+src/mailer.js: sends the emails through Brevo.
+Added 9 tests for the reset flow.
+
+2. **Settings pages (PRs #34 and #35):** Every link on the Settings page now opens a working page.
+src/index.js: fixed a route conflict that was hiding Nicholas's Account and Appearance pages.
+settings/about.hbs and settings/privacy.hbs: wrote the About Bloom and Privacy pages.
+Tested that every Settings page loads and the Account page saves changes.
