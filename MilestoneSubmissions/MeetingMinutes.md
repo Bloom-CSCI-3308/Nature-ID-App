@@ -35,3 +35,14 @@ Tariq worked on getting a local version of the app running and edited several ro
 
 Justin worked on user registration and login, including the "Remember me" feature and the Handlebars pages. He is also adding a recovery email to user registration.
 
+Meeting #4 - November 16th
+
+Tariq - Made a couple changes with the UI. He fixed the expanded UI when using a laptop/desktop.
+
+Nicholas - Started the settings page. Added in tiers common, rare and legendary to plants on the bloombex. Fixed an error with the bloombex layout for wide pages.
+
+Justin - He worked on the forget password, and he tried getting the website accessible online. Got the privacy stuff on the settings page
+
+Simon -  Added message whenever a user unlocked a new badge. There was a bug where you lose points when you remove a plant. There was also another bug with stuff relating to the database
+
+Akshay - Still working on the google maps api. work in progress.
