@@ -71,10 +71,23 @@ async function getPlantDescription(scientificName, commonName) {
 async function getOrCreatePlant(db, scientificName, commonName) {
   // Already in the database? Use it (no Wikipedia call needed).
   const existing = await db.oneOrNone(
-    'SELECT plant_id FROM plants WHERE scientific_name = $1',
+    'SELECT plant_id, common_name FROM plants WHERE scientific_name = $1',
     [scientificName]
   );
   if (existing) {
+    // Seeded catalogue rows have common_name = scientific_name (the CSV
+    // has no common names). The first time Pl@ntNet identifies this
+    // species with a real common name, fill it in.
+    if (
+      commonName &&
+      commonName !== scientificName &&
+      existing.common_name === scientificName
+    ) {
+      await db.none('UPDATE plants SET common_name = $1 WHERE plant_id = $2', [
+        commonName,
+        existing.plant_id,
+      ]);
+    }
     return existing.plant_id;
   }
 

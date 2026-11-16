@@ -310,12 +310,6 @@ app.get('/home', (req, res) => {
   res.render('pages/home', { user: req.session.user });
 });
 
-app.get('/settings', (req, res) => {
-  res.render('pages/settings', { user: req.session.user });
-});
-
-
-
 // -------------------------------------   SETTINGS ROUTES   ----------------------------------------------
 // Helper used by every Account render. It loads the email from the DB, but
 // falls back to a blank email (instead of erroring the whole page) if the
@@ -499,6 +493,20 @@ app.get('/logout', (req, res) => {
 });
 
 
+// ---- Bloomdex rarity ----
+// Driven by the species itself (IUCN rarity from the catalogue),
+// NOT by how many users found it — with only a few users, the
+// frequency version made every plant legendary.
+//   IUCN 'super rare' -> 'legendary'
+//   IUCN 'rare'       -> 'rare'
+//   IUCN 'common'     -> 'common'
+//   unknown / no IUCN data -> 'rare' if only 1 user found it, else 'common'
+function rarityIcon(organ, rarity) {
+  const o = ['leaf', 'flower', 'fruit', 'bark'].includes(organ) ? organ : 'leaf';
+  const r = ['common', 'rare', 'legendary'].includes(rarity) ? rarity : 'common';
+  return `/assets/organ-${o}-${r}.png`;
+}
+
 // -------------------------------------   COLLECTION ROUTES   ----------------------------------------------
 
 app.get('/collection', async (req, res) => {
@@ -512,6 +520,14 @@ app.get('/collection', async (req, res) => {
        COUNT(*)::int AS "timesFound",
        MAX(up.image_path) AS image,
        MAX(up.organ) AS organ,
+       (SELECT COUNT(DISTINCT user_id) FROM users_to_plants WHERE plant_id = p.plant_id)::int AS "finderCount",
+       CASE
+         WHEN p.iucn_rarity = 'super rare' THEN 'legendary'
+         WHEN p.iucn_rarity = 'rare' THEN 'rare'
+         WHEN p.iucn_rarity = 'common' THEN 'common'
+         WHEN (SELECT COUNT(DISTINCT user_id) FROM users_to_plants WHERE plant_id = p.plant_id) = 1 THEN 'rare'
+         ELSE 'common'
+       END AS rarity,
        MAX(up.found_at) AS "lastFound"
        FROM users_to_plants up
        JOIN plants p ON p.plant_id = up.plant_id
@@ -521,8 +537,13 @@ app.get('/collection', async (req, res) => {
       [userId]
     );
 
+    const plantsWithIcons = plants.map((p) => ({
+      ...p,
+      icon: rarityIcon(p.organ, p.rarity),
+    }));
+
     res.render('pages/collection', {
-  plants,
+  plants: plantsWithIcons,
   user: req.session.user,
   totalSpecies: plants.length,
   totalFinds: plants.reduce((sum, p) => sum + p.timesFound, 0),
@@ -555,8 +576,20 @@ app.get('/plants/:id', async (req, res) => {
               p.common_name AS "commonName",
               p.scientific_name AS "scientificName",
               p.plant_description AS description,
+              p.family,
+              p.common_type AS "commonType",
+              p.iucn_status AS "iucnStatus",
+              p.iucn_rarity AS "iucnRarity",
               up.image_path AS image,
               up.organ AS organ,
+              (SELECT COUNT(DISTINCT user_id) FROM users_to_plants WHERE plant_id = p.plant_id)::int AS "finderCount",
+              CASE
+                WHEN p.iucn_rarity = 'super rare' THEN 'legendary'
+                WHEN p.iucn_rarity = 'rare' THEN 'rare'
+                WHEN p.iucn_rarity = 'common' THEN 'common'
+                WHEN (SELECT COUNT(DISTINCT user_id) FROM users_to_plants WHERE plant_id = p.plant_id) = 1 THEN 'rare'
+                ELSE 'common'
+              END AS rarity,
               up.location,
               TO_CHAR(up.found_at, 'Mon DD, YYYY') AS "dateFound"
        FROM users_to_plants up
@@ -575,6 +608,8 @@ app.get('/plants/:id', async (req, res) => {
     // Show the badge message once, then clear it
     const badgeMessage = req.session.badgeMessage;
     delete req.session.badgeMessage;
+
+    plant.icon = rarityIcon(plant.organ, plant.rarity);
 
     res.render('pages/plant-detail', { plant, user: req.session.user, badgeMessage });
   } catch (err) {

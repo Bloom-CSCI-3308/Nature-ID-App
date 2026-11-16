@@ -7,29 +7,35 @@
     <span class="ms-auto small text-muted">Date found: {{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>
   </header>
 
-  <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
+  <div class="plant-detail-center">
+    <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
+    {{#if plant.rarity}}<span class="badge bg-warning text-dark">{{plant.rarity}}</span>{{/if}}
 
-  <div class="plant-detail-body">
-    {{#if plant.organ}}
-      <img src="/assets/organ-{{plant.organ}}.png" alt="{{plant.commonName}}" class="plant-detail-img" />
-    {{else if plant.image}}
-      <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-detail-img" />
-    {{else}}
-      <div class="plant-detail-img placeholder">🌾</div>
-    {{/if}}
-    <p class="plant-description">
-      {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
-    </p>
-    {{#if plant.scientificName}}
-      <p class="text-muted"><em>{{plant.scientificName}}</em></p>
-    {{/if}}
+    <div class="plant-detail-body">
+      {{#if plant.organ}}
+        <img src="{{plant.icon}}" alt="{{plant.commonName}}" class="plant-detail-img" />
+      {{else if plant.image}}
+        <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-detail-img" />
+      {{else}}
+        <div class="plant-detail-img placeholder">🌾</div>
+      {{/if}}
+      <p class="plant-description">
+        {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
+      </p>
+      {{#if plant.scientificName}}
+        <p class="text-muted"><em>{{plant.scientificName}}</em></p>
+      {{/if}}
+      {{#if plant.commonType}}
+        <p class="text-muted">{{plant.commonType}}{{#if plant.family}} &middot; {{plant.family}}{{/if}}{{#if plant.iucnStatus}} &middot; IUCN: {{plant.iucnStatus}}{{/if}}</p>
+      {{/if}}
+    </div>
+
+    <a href="/collection" class="btn btn-outline-secondary mt-3">← Back to Bloomdex</a>
+
+    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#removeModal">
+      Remove from Bloomdex
+    </button>
   </div>
-
-  <a href="/collection" class="btn btn-outline-secondary mt-3">← Back to Bloomdex</a>
-
-  <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#removeModal">
-    Remove from Bloomdex
-  </button>
 
   <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

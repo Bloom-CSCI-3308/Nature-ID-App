@@ -59,15 +59,28 @@ body { background: #e9ecef; }
 .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .plant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 .plant-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem; text-align: center; color: #212529; text-decoration: none; display: block; }
-.plant-card img { width: 100%; height: 110px; object-fit: cover; border-radius: 0.5rem; display: block; }
+.plant-card img { width: 100%; height: auto; object-fit: contain; border-radius: 0.5rem; display: block; }
 .plant-thumb { font-size: 2.5rem; }
 .plant-name { display: block; font-size: 0.9rem; }
 .plant-count { display: block; font-size: 0.8rem; color: #6c757d; }
 
 /* Plant detail */
 .plant-title { text-transform: capitalize; }
-.plant-detail-img { font-size: 5rem; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; max-width: 100%; }
+.plant-detail-img { width: 350px; height: auto; font-size: 5rem; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; max-width: 100%; display: block;margin-left: auto; margin-right: auto; }
 .plant-description { margin-top: 1rem; font-size: 1.05rem; }
+
+.plant-detail-center {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.plant-detail-center .plant-detail-img {
+  display: block;
+  margin: 0 auto;
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+}
 
 /* Settings */
 .settings-title { margin: 0; }

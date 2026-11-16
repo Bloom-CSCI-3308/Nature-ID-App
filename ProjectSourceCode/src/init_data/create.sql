@@ -17,7 +17,11 @@ CREATE TABLE IF NOT EXISTS plants (
   plant_id SERIAL PRIMARY KEY,
   common_name VARCHAR(100) NOT NULL,
   scientific_name VARCHAR(150) UNIQUE NOT NULL,
-  plant_description TEXT
+  plant_description TEXT,
+  family VARCHAR(100),
+  common_type VARCHAR(100),
+  iucn_status VARCHAR(50),
+  iucn_rarity VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS users_to_plants (
@@ -42,3 +46,10 @@ user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 badge_id INT NOT NULL REFERENCES badges(badge_id) ON DELETE CASCADE,
 obtained_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Catalogue columns, for databases created before this change.
+-- Safe to run on an existing database (IF NOT EXISTS, no data lost).
+ALTER TABLE plants ADD COLUMN IF NOT EXISTS family VARCHAR(100);
+ALTER TABLE plants ADD COLUMN IF NOT EXISTS common_type VARCHAR(100);
+ALTER TABLE plants ADD COLUMN IF NOT EXISTS iucn_status VARCHAR(50);
+ALTER TABLE plants ADD COLUMN IF NOT EXISTS iucn_rarity VARCHAR(20);
