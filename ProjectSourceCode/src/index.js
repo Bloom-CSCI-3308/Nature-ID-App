@@ -310,8 +310,6 @@ app.use(auth);
 
 const plantChat = require('./plant-chat');
 app.use(plantChat);
-app.use(express.json());
-app.use(plantChat);
 
 // -------------------------------------   PROTECTED ROUTES   ----------------------------------------------
 app.get('/home', (req, res) => {

@@ -61,7 +61,7 @@ router.post('/api/plant-chat', async function (req, res) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: buildSystemPrompt(body.plant || {}) }] },
         contents: contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } }  
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
       }),
       signal: controller.signal
     });
