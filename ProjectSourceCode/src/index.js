@@ -22,6 +22,9 @@ const hbs = handlebars.create({
   extname: 'hbs',
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
+    helpers: {
+    plural: (n, singular, plural) => (Number(n) === 1 ? singular : plural),
+  },
 });
 
 app.engine('hbs', hbs.engine);
