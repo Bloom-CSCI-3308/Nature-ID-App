@@ -1,0 +1,138 @@
+<div class="plant-detail-page">
+  {{#if badgeMessage}}
+    <div class="alert alert-success" role="status">🏅 {{badgeMessage}}</div>
+  {{/if}}
+  {{#if message}}
+    <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}}" role="alert">{{message}}</div>
+  {{/if}}
+
+  <header class="top-bar">
+    <a href="/collection" class="back-link" aria-label="Back to Bloomdex">←</a>
+    <a href="/settings" class="top-settings" aria-label="Settings"><img src="/assets/settings-button.png" class="top-settings-img" alt="Settings" /></a>
+  </header>
+
+  <div class="plant-detail-center">
+
+    <!-- Photo -->
+    <figure class="plant-hero">
+      {{#if plant.organ}}
+        <img src="{{plant.icon}}" alt="{{plant.commonName}}" class="plant-hero-img is-icon" />
+      {{else}}
+        <div class="plant-hero-img plant-hero-placeholder">🌾</div>
+      {{/if}}
+      {{#if plant.rarity}}<span class="plant-rarity">{{plant.rarity}}</span>{{/if}}
+    </figure>
+
+    <!-- Name -->
+    <div class="plant-heading">
+      <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
+      {{#if plant.scientificName}}
+        <p class="plant-scientific"><em>{{plant.scientificName}}</em></p>
+      {{/if}}
+    </div>
+
+    <!-- Details -->
+    <section class="plant-facts" aria-label="Plant details">
+      <div class="plant-fact">
+        <span class="fact-label">Date found</span>
+        <span class="fact-value">{{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>
+      </div>
+      {{#if plant.commonType}}
+        <div class="plant-fact">
+          <span class="fact-label">Type</span>
+          <span class="fact-value">{{plant.commonType}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.family}}
+        <div class="plant-fact">
+          <span class="fact-label">Family</span>
+          <span class="fact-value">{{plant.family}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.organ}}
+        <div class="plant-fact">
+          <span class="fact-label">Part photographed</span>
+          <span class="fact-value">{{plant.organ}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.iucnStatus}}
+        <div class="plant-fact">
+          <span class="fact-label">Conservation (IUCN)</span>
+          <span class="fact-value">{{plant.iucnStatus}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.rarity}}
+        <div class="plant-fact">
+          <span class="fact-label">Rarity</span>
+          <span class="fact-value">{{plant.rarity}}</span>
+        </div>
+      {{/if}}
+    </section>
+
+    <!-- About -->
+    <section class="plant-about">
+      <h3 class="plant-about-title">About this plant</h3>
+      <p class="plant-description">
+        {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
+      </p>
+    </section>
+
+    <!-- Bloom Bear chat -->
+    <section class="bear-chat" id="bear-chat" data-state="asleep"
+      data-avatar-base="/assets/avatar/"
+      data-plant-name="{{plant.commonName}}"
+      data-scientific="{{plant.scientificName}}"
+      data-family="{{plant.family}}"
+      data-type="{{plant.commonType}}"
+      data-iucn="{{plant.iucnStatus}}">
+      <button type="button" class="bear-btn" id="bear-btn" aria-expanded="false" aria-controls="bear-panel"
+        aria-label="Chat with Bloom Bear about {{plant.commonName}}">
+        <img id="bear-img" class="bear-img" src="/assets/avatar/BloomBear-Asleep.png" alt="" />
+        <span class="bear-hint">Ask Bloom Bear</span>
+      </button>
+
+      <div class="bear-panel" id="bear-panel" hidden>
+        <div class="bear-panel-head">
+          <span>Bloom Bear</span>
+          <button type="button" class="bear-close" id="bear-close" aria-label="Close chat">&times;</button>
+        </div>
+        <div class="bear-messages" id="bear-messages" aria-live="polite"></div>
+        <form class="bear-form" id="bear-form" autocomplete="off">
+          <input type="text" id="bear-input" maxlength="500" placeholder="Ask about {{plant.commonName}}…" aria-label="Your question" />
+          <button type="submit" id="bear-send" class="bear-send">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <div class="plant-actions">
+      <a href="/collection" class="btn btn-outline-secondary">← Back to Bloomdex</a>
+      <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
+        Remove from Bloomdex
+      </button>
+    </div>
+  </div>
+
+  <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="removeModalLabel">Remove from Bloomdex?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to remove <strong>{{plant.commonName}}</strong> from your Bloomdex?</p>
+          <p class="text-danger mb-0">This cannot be restored. You will need to identify the plant again to add it back.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="/plants/{{plant.id}}/remove" method="POST" class="m-0">
+            <button type="submit" class="btn btn-danger">Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/bloom-bear.js" defer></script>

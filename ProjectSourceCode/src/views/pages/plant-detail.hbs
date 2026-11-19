@@ -13,12 +13,10 @@
 
   <div class="plant-detail-center">
 
-    <!-- Top box: the organa icon goes in here, not below it -->
+    <!-- Photo -->
     <figure class="plant-hero">
-      {{#if plant.icon}}
+      {{#if plant.organ}}
         <img src="{{plant.icon}}" alt="{{plant.commonName}}" class="plant-hero-img is-icon" />
-      {{else if plant.image}}
-        <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-hero-img" />
       {{else}}
         <div class="plant-hero-img plant-hero-placeholder">🌾</div>
       {{/if}}
@@ -79,6 +77,33 @@
       </p>
     </section>
 
+    <!-- Bloom Bear chat -->
+    <section class="bear-chat" id="bear-chat" data-state="asleep"
+      data-avatar-base="/assets/avatar/"
+      data-plant-name="{{plant.commonName}}"
+      data-scientific="{{plant.scientificName}}"
+      data-family="{{plant.family}}"
+      data-type="{{plant.commonType}}"
+      data-iucn="{{plant.iucnStatus}}">
+      <button type="button" class="bear-btn" id="bear-btn" aria-expanded="false" aria-controls="bear-panel"
+        aria-label="Chat with Bloom Bear about {{plant.commonName}}">
+        <img id="bear-img" class="bear-img" src="/assets/avatar/BloomBear-Asleep.png" alt="" />
+        <span class="bear-hint">Ask Bloom Bear</span>
+      </button>
+
+      <div class="bear-panel" id="bear-panel" hidden>
+        <div class="bear-panel-head">
+          <span>Bloom Bear</span>
+          <button type="button" class="bear-close" id="bear-close" aria-label="Close chat">&times;</button>
+        </div>
+        <div class="bear-messages" id="bear-messages" aria-live="polite"></div>
+        <form class="bear-form" id="bear-form" autocomplete="off">
+          <input type="text" id="bear-input" maxlength="500" placeholder="Ask about {{plant.commonName}}…" aria-label="Your question" />
+          <button type="submit" id="bear-send" class="bear-send">Send</button>
+        </form>
+      </div>
+    </section>
+
     <!-- Actions -->
     <div class="plant-actions">
       <a href="/collection" class="btn btn-outline-secondary">← Back to Bloomdex</a>
@@ -109,3 +134,5 @@
     </div>
   </div>
 </div>
+
+<script src="/resources/js/bloom-bear.js" defer></script>
