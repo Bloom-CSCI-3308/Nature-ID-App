@@ -1,13 +1,13 @@
 <div class="awards-page">
-  <h2>Awards</h2>
+  <h2>Rewards</h2>
 
   {{#if message}}
     <div class="alert alert-danger" role="alert">{{message}}</div>
   {{/if}}
 
   <p>
-    <strong>{{points}}</strong> points ·
-    <strong>{{plantCount}}</strong> plants found
+    <strong>{{points}}</strong> {{plural points "point" "points"}} ·
+    <strong>{{plantCount}}</strong> {{plural plantCount "plant" "plants"}} found
   </p>
 
   {{#if nextBadge}}

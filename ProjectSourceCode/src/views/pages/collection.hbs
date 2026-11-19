@@ -8,7 +8,7 @@
   <h2>Your Bloomdex</h2>
 
   <p class="text-muted">
-    {{totalSpecies}} species &middot; {{totalFinds}} plants found
+    {{totalSpecies}} species &middot; {{totalFinds}} {{plural totalFinds "plant" "plants"}} found
   </p>
 
   {{#if message}}
@@ -26,7 +26,7 @@
         <span class="plant-name">{{commonName}}</span>
         {{#if rarity}}<span class="badge bg-warning text-dark">{{rarity}}</span>{{/if}}
         <span class="text-muted"><em>{{scientificName}}</em></span>
-        <span class="plant-count">Found {{timesFound}} times</span>
+        <span class="plant-count">Found {{timesFound}} {{plural timesFound "time" "times"}}</span>
       </a>
     {{else}}
       <p>No plants yet. <a href="/identify">Identify your first plant</a>.</p>
