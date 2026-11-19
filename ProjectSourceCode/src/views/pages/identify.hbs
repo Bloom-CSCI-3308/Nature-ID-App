@@ -1,16 +1,13 @@
-{{!-- src/views/pages/identify.hbs — REPLACE the GitHub/local version with this.
-     Same upload form as before (POST /identify, JPG/PNG + organ),
-     plus the result popup: plant info + Wikipedia description, with a
-     "Save to Bloomdex" button that POSTs to /collection.
-     POST /collection is already in index.js — it saves the plant,
-     gives +10 points only for a new species, and awards badges. --}}
+{{!-- Identify a plant. Upload is a green "Upload Image" button. Result card shows the photo you just took, with a "Save to Bloomdex" button that POSTs to /collection, including image_path, so the photo is saved and shows on the plant detail page. --}}
 <h2>Identify a plant</h2>
 
 <form action="/identify" method="POST" enctype="multipart/form-data">
   <div class="mb-3">
-    <label for="image" class="form-label">Photo (JPG or PNG)</label>
-    <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png" required />
+    <label for="image" class="upload-image-btn">Upload Image</label>
+    <input type="file" id="image" name="image" accept="image/jpeg,image/png" required style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;" />
+    <span id="upload-filename"></span>
   </div>
+  <div id="preview-wrap"></div>
   <div class="mb-3">
     <label for="organ" class="form-label">Plant part (optional)</label>
     <select class="form-select" id="organ" name="organ">
@@ -23,6 +20,30 @@
   </div>
   <button type="submit" class="btn btn-success">Identify</button>
 </form>
+
+<script>
+  (function () {
+    var input = document.getElementById('image');
+    var previewWrap = document.getElementById('preview-wrap');
+    var filename = document.getElementById('upload-filename');
+    input.addEventListener('change', function () {
+      var file = input.files[0];
+      if (!file) return;
+      filename.textContent = file.name;
+      previewWrap.innerHTML = '';
+      var img = document.createElement('img');
+      img.alt = 'Uploaded plant preview';
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '320px';
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        img.src = event.target.result;
+        previewWrap.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  })();
+</script>
 
 {{#if message}}
   <div class="alert alert-danger mt-3">{{message}}</div>
@@ -49,8 +70,8 @@
         <input type="hidden" name="scientific_name" value="{{scientificName}}" />
         <input type="hidden" name="common_name" value="{{commonName}}" />
         <input type="hidden" name="image_path" value="{{imagePath}}" />
-        <input type="hidden" name="location" value="{{location}}" />
         <input type="hidden" name="organ" value="{{predictedOrgan}}" />
+        <input type="hidden" name="location" value="{{location}}" />
         <button type="submit" class="btn btn-success">Save to Bloomdex</button>
       </form>
     </div>

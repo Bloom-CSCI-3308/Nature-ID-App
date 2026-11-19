@@ -1,0 +1,19 @@
+/* Keep nav icons and labels aligned */
+.page-content img:not([class]) {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  margin: 1rem auto;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.bottom-nav .nav-icon,
+.bottom-nav .nav-icon-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  line-height: 28px;
+}

@@ -2,39 +2,90 @@
   {{#if badgeMessage}}
     <div class="alert alert-success" role="status">🏅 {{badgeMessage}}</div>
   {{/if}}
+  {{#if message}}
+    <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}}" role="alert">{{message}}</div>
+  {{/if}}
+
   <header class="top-bar">
-    <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
-    <span class="ms-auto small text-muted">Date found: {{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>
+    <a href="/collection" class="back-link" aria-label="Back to Bloomdex">←</a>
+    <a href="/settings" class="top-settings" aria-label="Settings"><img src="/assets/settings-button.png" class="top-settings-img" alt="Settings" /></a>
   </header>
 
   <div class="plant-detail-center">
-    <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
-    {{#if plant.rarity}}<span class="badge bg-warning text-dark">{{plant.rarity}}</span>{{/if}}
 
-    <div class="plant-detail-body">
-      {{#if plant.organ}}
-        <img src="{{plant.icon}}" alt="{{plant.commonName}}" class="plant-detail-img" />
+    <!-- Top box: the organa icon goes in here, not below it -->
+    <figure class="plant-hero">
+      {{#if plant.icon}}
+        <img src="{{plant.icon}}" alt="{{plant.commonName}}" class="plant-hero-img is-icon" />
       {{else if plant.image}}
-        <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-detail-img" />
+        <img src="{{plant.image}}" alt="{{plant.commonName}}" class="plant-hero-img" />
       {{else}}
-        <div class="plant-detail-img placeholder">🌾</div>
+        <div class="plant-hero-img plant-hero-placeholder">🌾</div>
       {{/if}}
-      <p class="plant-description">
-        {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
-      </p>
+      {{#if plant.rarity}}<span class="plant-rarity">{{plant.rarity}}</span>{{/if}}
+    </figure>
+
+    <!-- Name -->
+    <div class="plant-heading">
+      <h2 class="plant-title">{{#if plant}}{{plant.commonName}}{{else}}Grass{{/if}}</h2>
       {{#if plant.scientificName}}
-        <p class="text-muted"><em>{{plant.scientificName}}</em></p>
-      {{/if}}
-      {{#if plant.commonType}}
-        <p class="text-muted">{{plant.commonType}}{{#if plant.family}} &middot; {{plant.family}}{{/if}}{{#if plant.iucnStatus}} &middot; IUCN: {{plant.iucnStatus}}{{/if}}</p>
+        <p class="plant-scientific"><em>{{plant.scientificName}}</em></p>
       {{/if}}
     </div>
 
-    <a href="/collection" class="btn btn-outline-secondary mt-3">← Back to Bloomdex</a>
+    <!-- Details -->
+    <section class="plant-facts" aria-label="Plant details">
+      <div class="plant-fact">
+        <span class="fact-label">Date found</span>
+        <span class="fact-value">{{#if plant.dateFound}}{{plant.dateFound}}{{else}}—{{/if}}</span>
+      </div>
+      {{#if plant.commonType}}
+        <div class="plant-fact">
+          <span class="fact-label">Type</span>
+          <span class="fact-value">{{plant.commonType}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.family}}
+        <div class="plant-fact">
+          <span class="fact-label">Family</span>
+          <span class="fact-value">{{plant.family}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.organ}}
+        <div class="plant-fact">
+          <span class="fact-label">Part photographed</span>
+          <span class="fact-value">{{plant.organ}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.iucnStatus}}
+        <div class="plant-fact">
+          <span class="fact-label">Conservation (IUCN)</span>
+          <span class="fact-value">{{plant.iucnStatus}}</span>
+        </div>
+      {{/if}}
+      {{#if plant.rarity}}
+        <div class="plant-fact">
+          <span class="fact-label">Rarity</span>
+          <span class="fact-value">{{plant.rarity}}</span>
+        </div>
+      {{/if}}
+    </section>
 
-    <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#removeModal">
-      Remove from Bloomdex
-    </button>
+    <!-- About -->
+    <section class="plant-about">
+      <h3 class="plant-about-title">About this plant</h3>
+      <p class="plant-description">
+        {{#if plant.description}}{{plant.description}}{{else}}Grass is green, and needs water to grow!{{/if}}
+      </p>
+    </section>
+
+    <!-- Actions -->
+    <div class="plant-actions">
+      <a href="/collection" class="btn btn-outline-secondary">← Back to Bloomdex</a>
+      <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
+        Remove from Bloomdex
+      </button>
+    </div>
   </div>
 
   <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">

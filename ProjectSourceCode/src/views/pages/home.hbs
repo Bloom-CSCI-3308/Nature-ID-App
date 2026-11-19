@@ -1,3 +1,4 @@
+{{!-- Home / camera page. Upload is top-right, an actual green text button. --}}
 <div class="camera-full">
   <div class="camera-stage">
     {{!-- Live camera preview, fills the screen --}}
@@ -15,12 +16,12 @@
     <div class="camera-top">
       <img src="/resources/img/bloom_logo.jpeg" class="app-logo" alt="Bloom" />
       <span class="camera-top-right">
-        {{!-- Upload lives up here, top-right --}}
-        <label class="camera-upload" id="camera-upload-label">
+        {{!-- Upload lives up here, top-right, now an actual green button --}}
+        <label class="camera-upload upload-image-btn" id="camera-upload-label">
           <input type="file" name="image" accept="image/*" capture="environment" hidden form="take-photo-form" />
-          <span>🖼️</span>
+          <span>Upload Image</span>
         </label>
-        <a href="/settings" class="top-settings" aria-label="Settings">⚙️</a>
+        <a href="/settings" class="top-settings" aria-label="Settings"><img src="/assets/settings-button.png" class="top-settings-img" alt="Settings" /></a>
       </span>
     </div>
 

@@ -739,54 +739,74 @@ app.post('/collection', async (req, res) => {
 });
 
 // Show the user's points, plant count, and every badge (earned or locked)
-app.get('/rewards', async (req, res) => {
-  const userId = req.session.user.user_id;
+  app.get('/rewards', async (req, res) => {
+    const userId = req.session.user.user_id;
 
-  try {
-    const stats = await db.one(
-      `SELECT u.points,
-              (SELECT COUNT(DISTINCT plant_id)
-               FROM users_to_plants
-               WHERE user_id = u.user_id)::int AS "plantCount"
-       FROM users u
-       WHERE u.user_id = $1`,
-      [userId]
-    );
+    const badgeImages = {
+      1: 'star-badge',
+      2: 'medal-badge',
+      3: 'trophy-badge',
+      4: 'book-badge',
+      5: 'crown-badge',
+      6: 'lily-badge',
+    };
 
-    const badges = await db.any(
-      `SELECT b.badge_id AS id,
-              b.badge_name AS name,
-              b.badge_description AS description,
-              b.badge_requirements AS "plantsRequired",
-              ub.user_id IS NOT NULL AS earned,
-              TO_CHAR(ub.obtained_at, 'Mon DD, YYYY') AS "dateEarned"
-       FROM badges b
-       LEFT JOIN users_to_badges ub
-         ON ub.badge_id = b.badge_id AND ub.user_id = $1
-       ORDER BY b.badge_requirements ASC`,
-      [userId]
-    );
+    try {
+      const stats = await db.one(
+        `SELECT u.points,
+                (SELECT COUNT(DISTINCT plant_id)
+                FROM users_to_plants
+                WHERE user_id = u.user_id)::int AS "plantCount"
+        FROM users u
+        WHERE u.user_id = $1`,
+        [userId]
+      );
 
-    // The first badge not earned yet is the next goal
-    const nextBadge = badges.find(b => !b.earned) || null;
+      const badges = await db.any(
+        `SELECT b.badge_id AS id,
+                b.badge_name AS name,
+                b.badge_description AS description,
+                b.badge_requirements AS "plantsRequired",
+                ub.user_id IS NOT NULL AS earned,
+                TO_CHAR(ub.obtained_at, 'Mon DD, YYYY') AS "dateEarned"
+        FROM badges b
+        LEFT JOIN users_to_badges ub
+          ON ub.badge_id = b.badge_id AND ub.user_id = $1
+        ORDER BY b.badge_requirements ASC`,
+        [userId]
+      );
 
-    res.render('pages/rewards', {
-      user: req.session.user,
-      points: stats.points,
-      plantCount: stats.plantCount,
-      badges,
-      nextBadge,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).render('pages/rewards', {
-      user: req.session.user,
-      badges: [],
-      error: true,
-      message: 'Could not load your rewards. Please try again.',
-    });
-  }
-});
+      const badgesWithImages = badges.map(badge => {
+        const base = badgeImages[badge.id] || 'star-badge';
+        return {
+          ...badge,
+          image: badge.earned
+            ? `/assets/badges/${base}.png`
+            : `/assets/badges/${base}-locked.png`,
+        };
+      });
+
+      // The first badge not earned yet is the next goal
+      const nextBadge = badgesWithImages.find(b => !b.earned) || null;
+
+      res.render('pages/rewards', {
+        user: req.session.user,
+        points: stats.points,
+        plantCount: stats.plantCount,
+        badges: badgesWithImages,
+        nextBadge,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).render('pages/rewards', {
+        user: req.session.user,
+        badges: [],
+        error: true,
+        message: 'Could not load your rewards. Please try again.',
+      });
+    }
+  });
+
 
 // -------------------------------------   START SERVER   ----------------------------------------------
 // Only listen when run directly (npm start); tests import the app without starting a server

@@ -1,5 +1,5 @@
-<div class="rewards-page">
-  <h2>Rewards</h2>
+<div class="awards-page">
+  <h2>Awards</h2>
 
   {{#if message}}
     <div class="alert alert-danger" role="alert">{{message}}</div>
@@ -12,30 +12,88 @@
 
   {{#if nextBadge}}
     <p>
-      Next badge:
+      Next award:
       {{#if nextBadge.image}}
-        <img src="{{nextBadge.image}}" class="badge-img badge-img-small" alt="{{nextBadge.name}}" />
+        <img src="{{nextBadge.image}}" class="award-img award-img-small" alt="{{nextBadge.name}}" />
       {{/if}}
       <strong>{{nextBadge.name}}</strong>
       ({{plantCount}} / {{nextBadge.plantsRequired}} plants)
     </p>
+  {{else}}
+    <p>You have earned every award. You are a <strong>Divine Phytologist</strong>.</p>
   {{/if}}
 
-  <ul class="list-group">
+  <div class="awards-row">
     {{#each badges}}
-      <li class="list-group-item {{#unless earned}}text-muted{{/unless}}">
-        {{#if image}}
-          <img src="{{image}}" class="badge-img {{#unless earned}}locked{{/unless}}" alt="{{name}}" />
-        {{else}}
-          <span aria-hidden="true">{{#if earned}}🏅{{else}}🔒{{/if}}</span>
-        {{/if}}
-        <strong>{{name}}</strong> — {{description}}
+      <div class="award-card {{#if earned}}earned{{else}}locked{{/if}}"
+           {{#if earned}}
+             data-badge-name="{{name}}"
+             data-badge-description="{{description}}"
+             data-badge-image="{{image}}"
+             data-badge-threshold="{{plantsRequired}}"
+             data-badge-date="{{dateEarned}}"
+           {{/if}}>
+        <div class="award-frame">
+          {{#if image}}
+            <img class="award-img" src="{{image}}" alt="{{name}} badge" />
+          {{else}}
+            <span aria-hidden="true">{{#if earned}}🏅{{else}}🔒{{/if}}</span>
+          {{/if}}
+        </div>
+        <p class="award-name">{{name}}</p>
         {{#if earned}}
-          <span class="small">(earned {{dateEarned}})</span>
+          <p class="award-state">Earned</p>
         {{else}}
-          <span class="small">(locked: find {{plantsRequired}} plants)</span>
+          <p class="award-state">Locked</p>
         {{/if}}
-      </li>
+      </div>
     {{/each}}
-  </ul>
+  </div>
 </div>
+
+<div class="award-modal" id="award-modal" hidden>
+  <div class="award-modal-backdrop" id="award-modal-backdrop"></div>
+  <div class="award-modal-box" role="dialog" aria-modal="true" aria-labelledby="award-modal-name">
+    <button class="award-modal-close" id="award-modal-close" aria-label="Close">&times;</button>
+    <div class="award-frame">
+      <img class="award-pedestal" src="/assets/badges/pedestal.png" alt="" aria-hidden="true" />
+      <img class="award-img" id="award-modal-image" src="" alt="" />
+    </div>
+    <h3 id="award-modal-name"></h3>
+    <p id="award-modal-description"></p>
+    <p id="award-modal-threshold"></p>
+    <p id="award-modal-date"></p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var modal = document.getElementById('award-modal');
+    var backdrop = document.getElementById('award-modal-backdrop');
+    var closeButton = document.getElementById('award-modal-close');
+
+    function openModal(card) {
+      document.getElementById('award-modal-name').textContent = card.dataset.badgeName;
+      document.getElementById('award-modal-description').textContent = card.dataset.badgeDescription;
+      document.getElementById('award-modal-image').src = card.dataset.badgeImage;
+      document.getElementById('award-modal-image').alt = card.dataset.badgeName + ' badge';
+      document.getElementById('award-modal-threshold').textContent = card.dataset.badgeThreshold + ' plants';
+      document.getElementById('award-modal-date').textContent = 'Earned ' + card.dataset.badgeDate;
+      modal.hidden = false;
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+    }
+
+    document.querySelectorAll('.award-card.earned').forEach(function (card) {
+      card.addEventListener('click', function () { openModal(card); });
+    });
+
+    closeButton.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeModal();
+    });
+  })();
+</script>

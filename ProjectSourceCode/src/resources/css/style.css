@@ -1,79 +1,235 @@
-body { background: #ffffff; }
+/* ---------- Design tokens ---------- */
+:root {
+  --green: #198754;
+  --green-deep: #146c43;
+  --green-tint: #eaf4ee;
+  --text: #1f2622;
+  --muted: #6b7570;
+  --border: #e3e8e5;
+  --surface: #ffffff;
+  --page: #ffffff;
+  --radius: 0.75rem;
+  --shadow-sm: 0 1px 2px rgba(20, 40, 28, 0.05), 0 2px 8px rgba(20, 40, 28, 0.05);
+  --shadow-up: 0 -4px 18px rgba(20, 40, 28, 0.06);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --green-tint: #1d2d24;
+  --text: #f1f1f1;
+  --muted: #a3aca7;
+  --border: #333a36;
+  --surface: #1e1e1e;
+  --page: #121212;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-up: 0 -4px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Base ---------- */
+body {
+  background: var(--page);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
 .phone-shell {
   max-width: 430px;
   margin: 0 auto;
-  background: #ffffff;
+  background: var(--surface);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
-.page-content { flex: 1; padding: 1rem 1rem 5.5rem; }
+.page-content { flex: 1; padding: 1.1rem 1.1rem 5.5rem; }
 .top-bar {
   display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.25rem 0; margin-bottom: 1rem;
+  padding: 0.25rem 0; margin-bottom: 1.1rem;
 }
 .top-logo, .top-camera, .top-settings { font-size: 1.5rem; text-decoration: none; }
 .top-settings { margin-left: auto; }
 
-/* Bottom nav — matches the wireframe: Bloomdex / Photo / Rewards */
+/* Bottom nav: Bloomdex / Photo / Rewards */
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 430px;
   display: flex; justify-content: space-around;
-  background: #fff; border-top: 1px solid #dee2e6; padding: 0.5rem 0;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow-up);
+  padding: 0.5rem 0;
   z-index: 10;
 }
-.bottom-nav .nav-item { text-align: center; color: #212529; text-decoration: none; }
+.bottom-nav .nav-item {
+  text-align: center; color: var(--text); text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+.bottom-nav .nav-item:hover { color: var(--green); }
 .bottom-nav .nav-icon { display: block; font-size: 1.4rem; }
-.bottom-nav .nav-label { font-size: 0.8rem; }
+.bottom-nav .nav-label { font-size: 0.78rem; letter-spacing: 0.01em; }
 
-/* Camera */
-.camera-view { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; text-align: center; }
+/* ---------- Camera (simple view) ---------- */
+.camera-view {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+}
 .camera-placeholder { font-size: 5rem; }
-.camera-preview { max-width: 100%; border-radius: 0.5rem; }
+.camera-preview { max-width: 100%; border-radius: var(--radius); }
 .take-photo-form { text-align: center; margin-top: 1rem; }
 .take-photo-btn {
-  display: inline-block; border: 2px solid #198754; color: #198754;
+  display: inline-block; border: 2px solid var(--green); color: var(--green);
   border-radius: 999px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.take-photo-btn:hover { background: var(--green); color: #fff; }
+
+/* ---------- Upload Image button ---------- */
+.upload-image-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4a9d6b 0%, #2f7a4f 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(47, 122, 79, 0.3);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
 }
 
-/* Login */
+.upload-image-btn::before {
+  content: "⬆";
+  font-size: 0.85em;
+  opacity: 0.9;
+}
+
+.upload-image-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #52ab75 0%, #2a6e47 100%);
+  box-shadow: 0 8px 20px rgba(47, 122, 79, 0.38);
+}
+
+.upload-image-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(47, 122, 79, 0.3);
+}
+
+.upload-image-btn:focus-visible,
+.upload-image-btn:focus-within {
+  outline: 3px solid rgba(74, 157, 107, 0.45);
+  outline-offset: 3px;
+}
+
+/* Camera page: smoky dark-green glass over the video */
+.camera-upload.upload-image-btn {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  background: rgba(26, 36, 30, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.camera-upload.upload-image-btn:hover {
+  background: rgba(26, 36, 30, 0.5);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Login ---------- */
 .login-page { padding-top: 3rem; }
 .logo-circle { font-size: 4rem; }
-.logo-text { font-weight: 700; margin-bottom: 2rem; }
-.login-form { 
-  max-width: 320px; 
+.logo-text { font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em; }
+.login-form {
+  max-width: 320px;
   margin: 0 auto;
-  padding: 1.5rem; 
-  border: 1.5px solid #dee2e6;  
-  border-radius: 16px; 
- }
+  padding: 1.75rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
 
-/* Profile */
+/* ---------- Profile ---------- */
 .profile-icon { font-size: 3.5rem; }
-.profile-tabs { display: flex; gap: 1rem; margin: 1rem 0; font-weight: 600; }
-.profile-tabs .tab.active { border-bottom: 2px solid #198754; }
+.profile-tabs { display: flex; gap: 1.25rem; margin: 1rem 0; font-weight: 600; }
+.profile-tabs .tab { padding-bottom: 0.25rem; color: var(--muted); }
+.profile-tabs .tab.active { border-bottom: 2px solid var(--green); color: var(--text); }
 .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-.badge-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.75rem 0.25rem; text-align: center; }
+.badge-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.25rem;
+  text-align: center;
+  background: var(--surface);
+}
 .badge-card.locked { opacity: 0.5; }
 .badge-icon { display: block; font-size: 1.6rem; }
 .badge-name { font-size: 0.8rem; }
 
-/* Search / Bloomdex */
+/* ---------- Search / Bloomdex ---------- */
 .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.search-bar input:focus,
+.search-bar .form-control:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.18);
+}
 .plant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-.plant-card { border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem; text-align: center; color: #212529; text-decoration: none; display: block; }
-.plant-card img { width: 100%; height: auto; object-fit: contain; border-radius: 0.5rem; display: block; }
+.plant-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  text-align: center;
+  color: var(--text);
+  text-decoration: none;
+  display: block;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.plant-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--green) 35%, var(--border));
+  box-shadow: 0 6px 16px rgba(20, 40, 28, 0.1);
+}
+.plant-card img {
+  width: 100%; height: auto; object-fit: contain;
+  border-radius: calc(var(--radius) - 0.2rem); display: block;
+}
 .plant-thumb { font-size: 2.5rem; }
-.plant-name { display: block; font-size: 0.9rem; }
-.plant-count { display: block; font-size: 0.8rem; color: #6c757d; }
+.plant-name { display: block; font-size: 0.9rem; font-weight: 600; margin-top: 0.25rem; }
+.plant-count { display: block; font-size: 0.8rem; color: var(--muted); }
 
-/* Plant detail */
+/* ---------- Plant detail ---------- */
 .plant-title { text-transform: capitalize; }
-.plant-detail-img { width: 350px; height: auto; font-size: 5rem; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem; max-width: 100%; display: block;margin-left: auto; margin-right: auto; }
-.plant-description { margin-top: 1rem; font-size: 1.05rem; }
+.plant-detail-img {
+  width: 350px; height: auto; font-size: 5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem; max-width: 100%;
+  display: block; margin-left: auto; margin-right: auto;
+  box-shadow: var(--shadow-sm);
+}
+.plant-description { margin-top: 1.1rem; font-size: 1.05rem; line-height: 1.65; }
 
 .plant-detail-center {
   max-width: 600px;
@@ -88,19 +244,24 @@ body { background: #ffffff; }
   object-fit: contain;
 }
 
-/* Settings */
+/* ---------- Settings ---------- */
 .settings-title { margin: 0; }
-.back-link { font-size: 1.5rem; text-decoration: none; color: #212529; }
-.settings-item { display: block; padding: 0.75rem 0; border-bottom: 1px solid #eee; color: #212529; text-decoration: none; }
+.back-link { font-size: 1.5rem; text-decoration: none; color: var(--text); }
+.settings-item {
+  display: block; padding: 0.85rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text); text-decoration: none;
+  transition: background 0.2s var(--ease), padding-left 0.2s var(--ease);
+}
+.settings-item:hover { background: var(--green-tint); padding-left: 0.6rem; }
 
-/* Camera app — full-screen camera, small bottom bar.
-   Height accounts for the page padding AND the fixed bottom nav
+/* ---------- Camera app: full-screen camera, small bottom bar ----------
+   Height accounts for the page padding and the fixed bottom nav
    (5.5rem at the bottom of .page-content), so the camera bar sits
-   above the bottom nav instead of behind it, and the nav stays
-   clickable. */
+   above the bottom nav and the nav stays clickable. */
 .camera-full {
-  margin: -1rem -1rem 0;
-  height: calc(100dvh - 6.5rem);
+  margin: -1.1rem -1.1rem 0;
+  height: calc(100dvh - 6.6rem);
   min-height: 480px;
   display: flex;
   flex-direction: column;
@@ -134,14 +295,15 @@ body { background: #ffffff; }
   align-items: center;
   justify-content: center;
   font-size: 5rem;
-  background: #111;
+  background: radial-gradient(circle at 50% 40%, #1a1f1c 0%, #0d0f0e 100%);
 }
 
 .camera-placeholder .camera-hint {
   font-size: 1rem;
-  color: #aaa;
+  color: #aab2ad;
 }
 
+/* Soft fade behind the top controls so they stay readable over bright video */
 .camera-top {
   position: absolute;
   top: 0;
@@ -150,8 +312,9 @@ body { background: #ffffff; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 1.5rem;
   font-size: 1.5rem;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
 }
 
 .camera-top-right {
@@ -173,8 +336,7 @@ body { background: #ffffff; }
   margin: 0;
 }
 
-/* Shutter in the bottom nav — replaces the old Photo icon.
-   Raised white circle, centered in the nav. */
+/* Shutter in the bottom nav: raised white circle, centered */
 .bottom-nav .camera-shutter {
   width: 64px;
   height: 64px;
@@ -182,17 +344,19 @@ body { background: #ffffff; }
   border-radius: 50%;
   border: 4px solid #fff;
   background: #fff;
-  box-shadow: 0 0 0 3px #dee2e6;
+  box-shadow: 0 0 0 3px var(--border), 0 6px 16px rgba(0, 0, 0, 0.18);
   cursor: pointer;
   padding: 0;
   margin-top: -32px;
+  transition: transform 0.15s var(--ease), background 0.15s var(--ease);
 }
 
 .bottom-nav .camera-shutter:active {
   background: #ccc;
+  transform: scale(0.94);
 }
 
-/* After capture only: floating Retake / Use row, just above the nav */
+/* After capture: floating Retake / Use row, just above the nav */
 .capture-actions {
   position: absolute;
   left: 1rem;
@@ -212,13 +376,13 @@ body { background: #ffffff; }
   z-index: 2;
 }
 
-/* Bloom logo (Assets/bloom_logo.jpeg) — replaces the 🌱 emoji.
-   The logo is a teal circle on an off-white square, so crop it round. */
+/* Bloom logo (Assets/bloom_logo.jpeg): crop round */
 .app-logo {
   height: 2rem;
   width: 2rem;
   border-radius: 50%;
   object-fit: cover;
+  box-shadow: 0 0 0 2px var(--green-tint);
 }
 
 /* Achievement badge images (Assets/Achievement_*.png) */
@@ -240,32 +404,377 @@ body { background: #ffffff; }
   opacity: 0.5;
 }
 
-@media (min-width: 768px){
+@media (min-width: 768px) {
   .phone-shell,
-  .bottom-nav{
+  .bottom-nav {
     max-width: none;
   }
-  .phone-shell{
+  .phone-shell {
     border-left: none;
     border-right: none;
   }
-  .plant-grid{
-    grid-template-columns:repeat(4, 1fr) ;
+  .plant-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
-  .badge-grid{
-    grid-template-columns:repeat(6, 1fr) ;
+  .badge-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
+/* ---------- Bloom awards, Bloomdex-style: badges span side to side ---------- */
 
-/* Dark mode — overrides, only when data-theme="dark" is on <html> */
-[data-theme="dark"] body { background: #121212; }
-[data-theme="dark"] .phone-shell { background: #1e1e1e; border-color: #333; color: #f1f1f1; }
-[data-theme="dark"] .bottom-nav { background: #1e1e1e; border-top-color: #333; }
-[data-theme="dark"] .bottom-nav .nav-item { color: #f1f1f1; }
-[data-theme="dark"] .settings-item { color: #f1f1f1; border-bottom-color: #333; }
-[data-theme="dark"] .back-link { color: #f1f1f1; }
-[data-theme="dark"] .plant-card { color: #f1f1f1; border-color: #333; }
-[data-theme="dark"] .badge-card { border-color: #333; }
-[data-theme="dark"] .camera-view { border-color: #333; }
-[data-theme="dark"] .text-muted { color: #aaa !important; }
+.awards-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.awards-count,
+.awards-next {
+  text-align: center;
+  margin: 8px 0;
+}
+
+.awards-count { font-weight: 600; }
+.awards-next { color: var(--muted); }
+
+.awards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.award-card {
+  flex: 1 1 140px;
+  max-width: 170px;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 14px;
+}
+
+.award-card.locked {
+  opacity: 0.95;
+}
+
+/* Frame behind each badge image. Change the url below to your frame image file. */
+.award-frame {
+  position: relative;
+  width: 100%;
+  max-width: 150px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-image: url('/assets/badges/frame.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Pedestal the award sits on top of. Tweak left / bottom / width to move it. */
+.award-pedestal {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(1.65);
+  width: 90%;
+  height: auto;
+  z-index: 0;
+}
+
+.award-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 130px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.award-img-small {
+  max-width: 40px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.award-name {
+  font-weight: 700;
+  margin: 8px 0 2px;
+}
+
+.award-description {
+  margin: 0 0 2px;
+  font-size: 0.92em;
+  color: var(--muted);
+}
+
+.award-threshold {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.award-state {
+  margin: 4px 0 0;
+  font-size: 0.9em;
+}
+
+/* Modal only: pedestal scoots down, and the text scoots down with it. */
+.award-modal-box .award-pedestal {
+  bottom: -60px;
+}
+
+.award-modal-box #award-modal-name {
+  margin-top: 60px;
+}
+
+.award-card.earned {
+  cursor: pointer;
+  transition: transform 0.2s var(--ease);
+}
+
+.award-card.earned:hover {
+  transform: translateY(-3px);
+}
+
+/* Award modal, only opens for badges you have earned */
+.award-modal[hidden] {
+  display: none;
+}
+
+.award-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.award-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 14, 10, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.award-modal-box {
+  position: relative;
+  background: var(--hatch-widget-surface, rgba(35, 38, 36, 0.82));
+  color: var(--hatch-widget-text, inherit);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 360px;
+  width: calc(100% - 32px);
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+/* Modal text matches the close X (#d7bf99) */
+.award-modal-box,
+.award-modal-box h1,
+.award-modal-box h2,
+.award-modal-box h3,
+.award-modal-box h4,
+.award-modal-box p,
+.award-modal-box span {
+  color: #d7bf99;
+}
+
+.award-modal-close {
+  color: #d7bf99;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .award-card {
+    flex: 1 1 30%;
+    max-width: none;
+  }
+}
+
+/* ---------- Accessibility ---------- */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgba(25, 135, 84, 0.4);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- Dark mode: only when data-theme="dark" is on <html> ---------- */
+[data-theme="dark"] .phone-shell { color: var(--text); }
+[data-theme="dark"] .login-form { background: var(--surface); }
+[data-theme="dark"] .plant-card:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
+[data-theme="dark"] .text-muted { color: var(--muted) !important; }
+
+/* ---------- Plant detail page (redesigned) ---------- */
+.plant-detail-page .top-bar { justify-content: space-between; }
+.plant-detail-page .top-settings { margin-left: 0; }
+
+.plant-hero {
+  position: relative;
+  margin: 0 0 1.1rem;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--green-tint);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.plant-hero-img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+}
+
+.plant-hero-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+}
+
+.plant-rarity {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  color: #fff;
+  background: rgba(26, 36, 30, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.plant-heading { margin-bottom: 1.1rem; }
+.plant-heading .plant-title { margin: 0 0 0.2rem; font-size: 1.75rem; }
+.plant-scientific { margin: 0; color: var(--muted); font-size: 1.05rem; }
+
+.plant-facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.plant-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.fact-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.02em; }
+.fact-value { font-weight: 600; text-transform: capitalize; overflow-wrap: anywhere; }
+
+.plant-about {
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: var(--green-tint);
+}
+
+.plant-about-title { font-size: 1rem; margin: 0 0 0.4rem; }
+.plant-about .plant-description { margin: 0; }
+
+.plant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.plant-actions .btn { flex: 1 1 auto; border-radius: 999px; }
+
+/* ---------- Rewards and Settings nav icons (restored) ---------- */
+.nav-icon-img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  margin: 0 auto;
+}
+
+.top-settings-img {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Hover bounce for the Rewards and Settings icons */
+.nav-icon-img,
+.top-settings-img {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item:hover .nav-icon-img,
+.top-settings:hover .top-settings-img {
+  transform: translateY(-5px);
+}
+
+.nav-item:active .nav-icon-img,
+.top-settings:active .top-settings-img {
+  transform: translateY(-1px);
+}
+
+/* Levitate the badge in the rewards modal on hover */
+@keyframes award-levitate {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+.award-modal-box .award-frame:hover .award-img,
+.award-modal-box .award-img:hover {
+  animation: award-levitate 1.8s ease-in-out infinite;
+}
+
+/* Organ icon: shown small and centered, like the original page */
+.plant-hero-img.is-icon {
+  aspect-ratio: auto;
+  max-width: 300px;
+  max-height: 300px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Photo preview on the identify page: keep it small instead of filling the page */
+.page-content :is(.camera-preview, .img-thumbnail, .img-fluid, img[id*="preview"], img[class*="preview"]):not(.camera-stage *) {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 280px;
+  margin: 1rem auto;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
