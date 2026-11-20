@@ -6,10 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeRadios.forEach((radio) => {
       radio.checked = radio.value === saved;
       radio.addEventListener('change', () => {
-        localStorage.setItem('bloom-theme', radio.value);
-        const dark = radio.value === 'dark' ||
-          (radio.value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        window.applyTheme(radio.value, true);
       });
     });
   }

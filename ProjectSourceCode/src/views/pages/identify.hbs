@@ -1,4 +1,4 @@
-{{!-- Identify a plant. Two-part page: the upload form on top, and (after identifying) a Bloom Bear speech bubble plus a result card with a size-capped photo and a "Save to Bloomdex" button that POSTs to /collection with image_path. --}}
+{{!-- Identify a plant. Result (bear bubble + result card) on top, upload form at the bottom. --}}
 <style>
   /* Uses the site's design tokens (--surface, --text, --muted, --border, --green...),
      so light and dark mode follow [data-theme="dark"] automatically.
@@ -78,37 +78,6 @@
 <div class="identify-page">
   <h2>Identify a plant</h2>
 
-  <form action="/identify" method="POST" enctype="multipart/form-data">
-    <div class="upload-panel">
-      <div class="upload-fields">
-        <div class="upload-row">
-          <label for="image" class="upload-image-btn">Upload Image</label>
-          <input type="file" id="image" name="image" accept="image/jpeg,image/png" required style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;" />
-          <span id="upload-filename">JPG or PNG, up to 10 MB</span>
-        </div>
-
-        <div>
-          <label for="organ" class="form-label">Plant part (optional)</label>
-          <select class="form-select" id="organ" name="organ">
-            <option value="auto" selected>Auto</option>
-            <option value="leaf">Leaf</option>
-            <option value="flower">Flower</option>
-            <option value="fruit">Fruit</option>
-            <option value="bark">Bark</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn btn-success">Identify</button>
-      </div>
-
-      <div id="preview-wrap" class="preview-box">Your photo will show up here</div>
-    </div>
-  </form>
-
-  {{#if message}}
-    <div class="alert alert-danger mt-3">{{message}}</div>
-  {{/if}}
-
   {{#if bestMatch}}
     <div class="bear-row">
       <img src="../assets/avatar/BloomBear-Talking.png" alt="Bloom Bear talking" />
@@ -165,6 +134,38 @@
         </ul>
       </div>
     {{/if}}
+  {{/if}}
+
+  {{!-- Upload block, at the bottom --}}
+  <form action="/identify" method="POST" enctype="multipart/form-data" style="margin-top: 2rem;">
+    <div class="upload-panel">
+      <div class="upload-fields">
+        <div class="upload-row">
+          <label for="image" class="upload-image-btn">Upload Image</label>
+          <input type="file" id="image" name="image" accept="image/jpeg,image/png" required style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;" />
+          <span id="upload-filename">JPG or PNG, up to 10 MB</span>
+        </div>
+
+        <div>
+          <label for="organ" class="form-label">Plant part (optional)</label>
+          <select class="form-select" id="organ" name="organ">
+            <option value="auto" selected>Auto</option>
+            <option value="leaf">Leaf</option>
+            <option value="flower">Flower</option>
+            <option value="fruit">Fruit</option>
+            <option value="bark">Bark</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Identify</button>
+      </div>
+
+      <div id="preview-wrap" class="preview-box">Your photo will show up here</div>
+    </div>
+  </form>
+
+  {{#if message}}
+    <div class="alert alert-danger mt-3">{{message}}</div>
   {{/if}}
 </div>
 
